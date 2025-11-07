@@ -1,0 +1,20 @@
+version: 1
+frontend:
+  phases:
+    preBuild:
+      commands:
+        - npm ci
+        - echo "API_URL=$API_URL" >> .env.production
+        - echo "SESSION_SECRET=$SESSION_SECRET" >> .env.production
+        - echo "BUCKET_HOSTNAME=$BUCKET_HOSTNAME" >> .env.production
+        - echo "NEXT_PUBLIC_URL=$NEXT_PUBLIC_URL" >> .env.production
+    build:
+      commands:
+        - npm run build
+  artifacts:
+    baseDirectory: .next
+    files:
+      - "**/*"
+  cache:
+    paths:
+      - node_modules/**/*
