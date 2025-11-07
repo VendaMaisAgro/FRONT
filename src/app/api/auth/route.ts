@@ -1,13 +1,18 @@
 // src/app/api/login/route.ts
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { formatCpfCnpj } from "@/utils/functions";
 
 export async function POST(request: NextRequest) {
   try {
     const { identifier, password } = await request.json();
-    const identifierType = identifier.length === 11 ? "cpf" : "cnpj";
+    // Remove caracteres não numéricos para verificar o comprimento
+    const cleanedIdentifier = identifier.replace(/\D/g, "");
+    const identifierType = cleanedIdentifier.length === 11 ? "cpf" : "cnpj";
+    // Formata o identifier antes de enviar ao backend
+    const formattedIdentifier = formatCpfCnpj(identifier);
     const payload = {
-      [identifierType]: identifier,
+      [identifierType]: formattedIdentifier,
       password: password,
     };
 
