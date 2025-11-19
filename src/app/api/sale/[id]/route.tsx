@@ -1,12 +1,21 @@
 import { verifySession } from "@/lib/session";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
+import { isValidUUID } from "@/lib/validation";
 
 export async function GET(
     _req: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
     const { id } = await params;
+
+    // Validar formato do UUID
+    if (!isValidUUID(id)) {
+        return NextResponse.json(
+            { error: "ID inválido" },
+            { status: 400 }
+        );
+    }
 
     try {
         const cookieStore = await cookies();

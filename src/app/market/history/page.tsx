@@ -38,7 +38,8 @@ export default function OrderHistoryPage() {
               quantityLabel: `${Number(bp.amount)} un`,
             }))
 
-            const itemsTotal = (s.boughtProducts ?? []).reduce((acc, it) => acc + (Number(it.value) * Number(it.amount)), 0)
+            // it.value já é o valor total (preço unitário * quantidade)
+            const itemsTotal = (s.boughtProducts ?? []).reduce((acc, it) => acc + Number(it.value), 0)
             const total = Number((itemsTotal + Number(s.transportValue || 0)))
 
             const vendorLabel =
@@ -55,6 +56,8 @@ export default function OrderHistoryPage() {
               status: s.arrivedAt ? 'delivered' : 'pending',
               items,
               vendorLabel,
+              paymentCompleted: s.paymentCompleted ?? false,
+              paymentMethodId: s.paymentMethodId,
             }
           })
 
