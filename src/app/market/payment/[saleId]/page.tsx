@@ -391,7 +391,7 @@ export default function PaymentPage() {
 										) : (
 											<>
 												<CreditCard className="w-4 h-4" />
-												Pagar com Mercado Pago
+												Finalizar compra
 											</>
 										)}
 									</Button>
