@@ -23,20 +23,20 @@ export function OrderCard({
             Pedido #{order.id}
           </div>
 
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-4 md:items-center">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:items-center">
             <div className="col-span-2">
               <div className="text-sm leading-5">
                 <span className="text-muted-foreground">Comprador:</span>{" "}
                 <span className="font-medium">{order.buyer}</span>
               </div>
             </div>
-            <div className="col-span-1">
+            <div className="col-span-2">
               <div className="text-sm leading-5">
                 <span className="text-muted-foreground">Produto:</span>{" "}
                 <span className="font-medium">{order.product}</span>
               </div>
             </div>
-            <div className="col-span-1 flex items-center justify-between gap-3 md:justify-end">
+            <div className="col-span-2 flex items-center justify-between gap-3 md:justify-end">
               <div className="text-sm text-muted-foreground">Status:</div>
               {order.action === "accepted" ? (
                 <Button variant="outline" className="gap-2" onClick={onChangeStatus}>
@@ -52,12 +52,12 @@ export function OrderCard({
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <div className="text-sm">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-6">
+            <div className="col-span-2 text-sm">
               <span className="text-muted-foreground">Valor:</span>{" "}
               <span className="font-medium">{moneyMask(order.value)}</span>
             </div>
-            <div className="text-sm">
+            <div className="col-span-2 text-sm">
               <span className="text-muted-foreground">Pagamento:</span>{" "}
               <span className="font-medium">{order.payment}</span>
             </div>

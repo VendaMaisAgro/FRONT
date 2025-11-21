@@ -12,7 +12,22 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { status } = body;
+    const { status, cargoWeightKg } = body;
+
+    const requestBody: { status?: string; cargoWeightKg?: number | string } = {};
+    
+    if (status) {
+      requestBody.status = status;
+    }
+    
+    if (cargoWeightKg) {
+      const weightAsNumber = Number(cargoWeightKg);
+      if (!isNaN(weightAsNumber)) {
+        requestBody.cargoWeightKg = weightAsNumber;
+      } else {
+        requestBody.cargoWeightKg = cargoWeightKg;
+      }
+    }
 
     const res = await fetch(`${process.env.API_URL}/sales/${id}`, {
       method: "PUT",
@@ -20,17 +35,17 @@ export async function PUT(
         Authorization: `Bearer ${token.jwt}`,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ status }),
+      body: JSON.stringify(requestBody),
     });
     
     if (res.ok) {
       const data = await res.json();
       return NextResponse.json(data);
     }
-    
+
     return NextResponse.error();
   } catch (error) {
-    console.error("Erro ao atualizar status da venda:", error);
+    console.error(error);
     return NextResponse.error();
   }
 }
