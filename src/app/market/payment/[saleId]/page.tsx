@@ -1,18 +1,17 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useParams, useRouter } from 'next/navigation'
+import { useParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { currencyFormatter } from '@/utils/functions'
-import { CreditCard, ArrowLeft, Loader2, AlertCircle } from 'lucide-react'
+import { CreditCard, Loader2, AlertCircle } from 'lucide-react'
 import type { SaleData } from '@/types/types'
 import { isValidUUID, sanitizeString, isValidPaymentUrl, validatePaymentData } from '@/lib/validation'
 
 export default function PaymentPage() {
 	const params = useParams()
-	const router = useRouter()
 	const saleId = params?.saleId as string | undefined
 
 	const [sale, setSale] = useState<SaleData | null>(null)
@@ -207,7 +206,7 @@ export default function PaymentPage() {
 
 	if (loading) {
 		return (
-			<div className="min-h-screen bg-gray-50 py-8 px-4">
+			<div className="py-8 px-4">
 				<div className="max-w-4xl mx-auto space-y-6">
 					<Skeleton className="h-10 w-48" />
 					<Card>
@@ -227,16 +226,8 @@ export default function PaymentPage() {
 
 	if (error && !sale) {
 		return (
-			<div className="min-h-screen bg-gray-50 py-8 px-4">
+			<div className="py-8 px-4">
 				<div className="max-w-4xl mx-auto space-y-6">
-					<Button
-						variant="ghost"
-						onClick={() => router.push('/market/history')}
-						className="gap-2"
-					>
-						<ArrowLeft className="w-4 h-4" />
-						Voltar ao histórico
-					</Button>
 					<div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3">
 						<AlertCircle className="h-5 w-5 text-red-600 flex-shrink-0 mt-0.5" />
 						<p className="text-sm text-red-800">{error}</p>
@@ -263,18 +254,10 @@ export default function PaymentPage() {
 		sale.boughtProducts[0]?.product?.seller?.name || 'Vendedor desconhecido'
 
 	return (
-		<div className="min-h-screen bg-gray-50 py-8 px-4">
+		<div className="py-8 px-4">
 			<div className="max-w-4xl mx-auto space-y-6">
 				{/* Header */}
-				<div className="flex items-center gap-4">
-					<Button
-						variant="ghost"
-						onClick={() => router.push('/market/history')}
-						className="gap-2"
-					>
-						<ArrowLeft className="w-4 h-4" />
-						Voltar
-					</Button>
+				<div>
 					<h1 className="text-2xl font-bold text-gray-900">Checkout de Pagamento</h1>
 				</div>
 
