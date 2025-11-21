@@ -36,7 +36,8 @@ export default function PaymentPage() {
 		const fetchSale = async () => {
 			try {
 				setLoading(true)
-				const res = await fetch(`/api/sale/${saleId}`, {
+				// Buscar todas as compras do usuário para obter dados completos (incluindo sellingUnitProduct.unit e product.seller)
+				const res = await fetch('/api/sale?mine=1', {
 					credentials: 'include',
 					cache: 'no-store',
 				})
@@ -50,9 +51,15 @@ export default function PaymentPage() {
 					return
 				}
 
-				const data = await res.json()
-				// A API pode retornar { data: SaleData } ou SaleData diretamente
-				const saleData: SaleData = data.data || data
+				const sales: SaleData[] = await res.json()
+				
+				// Filtrar pelo saleId específico
+				const saleData = sales.find((s) => s.id === saleId)
+
+				if (!saleData) {
+					setError('Pedido não encontrado')
+					return
+				}
 
 				// Debug: verificar paymentMethodId
 				console.log('PaymentMethodId recebido:', saleData.paymentMethodId, typeof saleData.paymentMethodId)
@@ -295,8 +302,11 @@ export default function PaymentPage() {
 														{bp.product?.name || 'Produto'}
 													</p>
 													<p className="text-xs text-gray-500">
-														{bp.sellingUnitProduct?.unit?.title || 'un'} -{' '}
-														{bp.amount} unidade(s)
+														{(() => {
+															// Obter a unidade de venda do endpoint (unit.unit ou unit.title)
+															const unit = bp.sellingUnitProduct?.unit?.unit || bp.sellingUnitProduct?.unit?.title || 'un'
+															return `${bp.amount} ${unit}`
+														})()}
 													</p>
 												</div>
 												<p className="text-sm font-semibold text-gray-900">
