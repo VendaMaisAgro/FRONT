@@ -3,8 +3,11 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { currencyFormatter } from '@/utils/functions'
-import { Eye, MessageSquare, ShoppingCart } from 'lucide-react'
+import { Eye, MessageSquare, ShoppingCart, CreditCard } from 'lucide-react'
 import React from 'react'
+import { useRouter } from 'next/navigation'
+import { isValidUUID } from '@/lib/validation'
+
 export type OrderItemView = {
     productId: number
     name: string
@@ -20,6 +23,8 @@ export type OrderView = {
     status: 'delivered' | 'pending'
     items: OrderItemView[]
     vendorLabel: string
+    paymentCompleted: boolean
+    paymentMethodId: string
 }
 
 function FirstItem({ name, quantityLabel }: { name: string; quantityLabel: string }) {
@@ -33,6 +38,14 @@ function FirstItem({ name, quantityLabel }: { name: string; quantityLabel: strin
 
 export default React.memo(function OrderCard({ order }: { order: OrderView }) {
     const first = order.items?.[0]
+    const router = useRouter()
+
+    const handlePayment = () => {
+        // Validar ID antes de redirecionar
+        if (isValidUUID(order.id)) {
+            router.push(`/market/payment/${order.id}`)
+        }
+    }
 
     return (
         <div className="bg-white md:rounded-lg md:border border-gray-200 md:shadow-sm">
@@ -72,14 +85,22 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                 Total {currencyFormatter(order.total)}
                             </p>
 
-                            <p className="text-sm font-semibold text-gray-900 mb-3">
-                                Total R$ {order.total.toFixed(2).replace('.', ',')}
-                            </p>
-
-                            <Button className="bg-green-600 hover:bg-green-700 w-full text-sm h-9" size="sm">
-                                <Eye className="w-4 h-4 mr-2" />
-                                Ver compra
-                            </Button>
+                            <div className="flex flex-col gap-2">
+                                {!order.paymentCompleted && (
+                                    <Button 
+                                        onClick={handlePayment}
+                                        className="bg-green-600 hover:bg-green-700 w-full text-sm h-9" 
+                                        size="sm"
+                                    >
+                                        <CreditCard className="w-4 h-4 mr-2" />
+                                        Realizar pagamento
+                                    </Button>
+                                )}
+                                <Button className="bg-green-600 hover:bg-green-700 w-full text-sm h-9" size="sm">
+                                    <Eye className="w-4 h-4 mr-2" />
+                                    Ver compra
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -123,7 +144,17 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                 </Button>
                             </div>
 
-                            <div className="flex gap-2">
+                            <div className="flex gap-2 flex-wrap">
+                                {!order.paymentCompleted && (
+                                    <Button 
+                                        onClick={handlePayment}
+                                        className="bg-green-600 hover:bg-green-700 gap-2" 
+                                        size="sm"
+                                    >
+                                        <CreditCard className="w-4 h-4" />
+                                        Realizar pagamento
+                                    </Button>
+                                )}
                                 <Button variant="outline" size="sm" className="gap-2">
                                     <Eye className="w-4 h-4" />
                                     Ver compra

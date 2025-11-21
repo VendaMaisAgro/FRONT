@@ -32,13 +32,18 @@ export default function OrderHistoryPage() {
           const sales: SaleData[] = await res.json()
 
           const mapped: (OrderView & { createdAtISO: string })[] = sales.map((s) => {
-            const items = (s.boughtProducts ?? []).map((bp) => ({
-              productId: Number(bp.productId),
-              name: resolveProductName(bp),
-              quantityLabel: `${Number(bp.amount)} un`,
-            }))
+            const items = (s.boughtProducts ?? []).map((bp) => {
+              // Obter a unidade de venda do endpoint (unit.unit ou unit.title)
+              const unit = bp.sellingUnitProduct?.unit?.unit || bp.sellingUnitProduct?.unit?.title || 'un'
+              return {
+                productId: Number(bp.productId),
+                name: resolveProductName(bp),
+                quantityLabel: `${Number(bp.amount)} ${unit}`,
+              }
+            })
 
-            const itemsTotal = (s.boughtProducts ?? []).reduce((acc, it) => acc + (Number(it.value) * Number(it.amount)), 0)
+            // it.value já é o valor total (preço unitário * quantidade)
+            const itemsTotal = (s.boughtProducts ?? []).reduce((acc, it) => acc + Number(it.value), 0)
             const total = Number((itemsTotal + Number(s.transportValue || 0)))
 
             const vendorLabel =
@@ -55,6 +60,8 @@ export default function OrderHistoryPage() {
               status: s.arrivedAt ? 'delivered' : 'pending',
               items,
               vendorLabel,
+              paymentCompleted: s.paymentCompleted ?? false,
+              paymentMethodId: s.paymentMethodId,
             }
           })
 
