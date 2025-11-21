@@ -6,13 +6,13 @@ import { redirect } from "next/navigation";
 
 const key = new TextEncoder().encode(process.env.SESSION_SECRET);
 const cookie = {
-  name: "session",
-  options: {
-    httpOnly: true,
-    // secure: true,
-    sameSite: "lax" as const,
-    path: "/",
-  },
+	name: 'session',
+	options: {
+		httpOnly: true,
+		secure: process.env.NODE_ENV === 'production' ? true : false,
+		sameSite: 'lax' as const,
+		path: '/',
+	},
 };
 
 export async function encrypt(payload: UserPayload) {

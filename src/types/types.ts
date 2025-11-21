@@ -192,6 +192,7 @@ export type Order = {
 	payment: string;
 	status: OrderStatus;
 	action?: OrderAction; // Nova propriedade para controlar se foi aceito/recusado
+	cargoWeightKg?: string; // Peso da carga em kg
 };
 
 // Tipos para a API de vendas
@@ -281,6 +282,12 @@ export type SaleData = {
 	paymentMethodId: string;
 	buyerId: string;
 	paymentCompleted: boolean;
+	/**
+	 * Indica a decisão do vendedor sobre o pedido:
+	 * true = aceito, false = recusado, null = pendente
+	 */
+	sellerApproved?: boolean | null;
+	cargoWeightKg?: string;
 	buyer: SaleBuyer;
 	boughtProducts: SaleBoughtProduct[];
 	shippingAddress: SaleShippingAddress;
