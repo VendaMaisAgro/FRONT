@@ -4,13 +4,13 @@ import { Eye, RefreshCcw, CheckCircle2, XCircle, Info } from "lucide-react";
 import { moneyMask } from "@/utils/functions";
 import { Order } from "@/types/types";
 
-export function OrderCard({ 
-  order, 
-  onChangeStatus, 
-  onAccept, 
-  onReject 
-}: { 
-  order: Order; 
+export function OrderCard({
+  order,
+  onChangeStatus,
+  onAccept,
+  onReject
+}: {
+  order: Order;
   onChangeStatus: () => void;
   onAccept: () => void;
   onReject: () => void;
@@ -37,7 +37,7 @@ export function OrderCard({
               </div>
             </div>
             <div className="col-span-2 flex items-center justify-between gap-3 md:justify-end">
-              <div className="text-sm text-muted-foreground">Status:</div>
+              <div className="text-sm text-muted-foreground">Alterar Status:</div>
               {order.action === "accepted" ? (
                 <Button variant="outline" className="gap-2" onClick={onChangeStatus}>
                   <RefreshCcw className="size-4" /> Alterar status
@@ -49,6 +49,15 @@ export function OrderCard({
                   <Info className="size-3.5" /> Disponível após aceitar
                 </span>
               )}
+            </div>
+            <div className="col-span-2 md:col-start-5 flex items-center justify-end gap-2">
+              <span className="text-sm text-muted-foreground">Status atual:</span>
+              <span className="font-medium text-sm">
+                {order.status === 'new' && 'Novo'}
+                {order.status === 'processing' && 'Processando'}
+                {order.status === 'pickup' && 'Pronto para retirada'}
+                {order.status === 'completed' && 'Concluído'}
+              </span>
             </div>
           </div>
 
@@ -69,14 +78,14 @@ export function OrderCard({
             </Button>
             {!order.action && (
               <>
-                <Button 
-                  className="flex-1 gap-2" 
+                <Button
+                  className="flex-1 gap-2"
                   onClick={onAccept}
                 >
                   <CheckCircle2 className="size-4" /> Aceitar
                 </Button>
-                <Button 
-                  variant="destructive" 
+                <Button
+                  variant="destructive"
                   className="flex-1 gap-2"
                   onClick={onReject}
                 >
