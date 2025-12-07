@@ -3,7 +3,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { CardContent } from '@/components/ui/card'
 import { currencyFormatter } from '@/utils/functions'
-import { Eye, MessageSquare, ShoppingCart, CreditCard } from 'lucide-react'
+import { Eye, MessageSquare, ShoppingCart, CreditCard, CheckCircle } from 'lucide-react'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { isValidUUID } from '@/lib/validation'
@@ -22,12 +22,13 @@ export type OrderView = {
     dateLabel: string
     total: number
     deliveryDateLabel?: string
-    status: 'delivered' | 'pending' | 'rejected' | 'ready' | 'received' | 'completed'
+    status: 'delivered' | 'pending' | 'rejected' | 'ready' | 'received' | 'completed' | 'waiting' | 'preparing'
     statusLabel: string
     items: OrderItemView[]
     vendorLabel: string
     paymentCompleted: boolean
     paymentMethodId: string
+    sellerApproved: boolean | null
 }
 
 function FirstItem({ name, quantityLabel }: { name: string; quantityLabel: string }) {
@@ -83,7 +84,11 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                     ? 'bg-red-100 text-red-800 hover:bg-red-100'
                                     : order.status === 'ready'
                                         ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                        : 'bg-green-100 text-green-800 hover:bg-green-100'
+                                        : order.status === 'preparing'
+                                            ? 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                                            : order.status === 'waiting'
+                                                ? 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                                                : 'bg-green-100 text-green-800 hover:bg-green-100'
                                     }`}
                             >
                                 {order.statusLabel}
@@ -100,7 +105,12 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                             </p>
 
                             <div className="flex flex-col gap-2">
-                                {!order.paymentCompleted && (
+                                {order.paymentCompleted ? (
+                                    <div className="flex items-center justify-center text-green-600 bg-green-50 px-3 py-2 rounded-md text-sm font-medium w-full">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Pagamento confirmado
+                                    </div>
+                                ) : order.sellerApproved === true ? (
                                     <Button
                                         onClick={handlePayment}
                                         className="bg-green-600 hover:bg-green-700 w-full text-sm h-9"
@@ -109,6 +119,10 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                         <CreditCard className="w-4 h-4 mr-2" />
                                         Realizar pagamento
                                     </Button>
+                                ) : order.status !== 'rejected' && (
+                                    <div className="text-center text-xs text-gray-500 bg-gray-50 p-2 rounded border border-dashed border-gray-200">
+                                        Aguardando aprovação para liberar pagamento
+                                    </div>
                                 )}
                                 <Button className="bg-green-600 hover:bg-green-700 w-full text-sm h-9" size="sm">
                                     <Eye className="w-4 h-4 mr-2" />
@@ -146,7 +160,11 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                                 ? 'bg-red-100 text-red-800 hover:bg-red-100'
                                                 : order.status === 'ready'
                                                     ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                                    : 'bg-green-100 text-green-800 hover:bg-green-100'
+                                                    : order.status === 'preparing'
+                                                        ? 'bg-blue-100 text-blue-800 hover:bg-blue-100'
+                                                        : order.status === 'waiting'
+                                                            ? 'bg-gray-100 text-gray-800 hover:bg-gray-100'
+                                                            : 'bg-green-100 text-green-800 hover:bg-green-100'
                                         }
                                     >
                                         {order.statusLabel}
@@ -169,8 +187,13 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                 </Button>
                             </div>
 
-                            <div className="flex gap-2 flex-wrap">
-                                {!order.paymentCompleted && (
+                            <div className="flex gap-2 flex-wrap justify-end">
+                                {order.paymentCompleted ? (
+                                    <div className="flex items-center text-green-600 font-medium text-sm px-3 py-1.5 bg-green-50 rounded-md">
+                                        <CheckCircle className="w-4 h-4 mr-2" />
+                                        Pagamento confirmado
+                                    </div>
+                                ) : order.sellerApproved === true ? (
                                     <Button
                                         onClick={handlePayment}
                                         className="bg-green-600 hover:bg-green-700 gap-2"
@@ -179,6 +202,10 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                         <CreditCard className="w-4 h-4" />
                                         Realizar pagamento
                                     </Button>
+                                ) : order.status !== 'rejected' && (
+                                    <div className="flex items-center text-xs text-gray-500 bg-gray-50 px-3 py-1.5 rounded border border-dashed border-gray-200">
+                                        Aguardando aprovação
+                                    </div>
                                 )}
                                 <Button variant="outline" size="sm" className="gap-2">
                                     <Eye className="w-4 h-4" />
