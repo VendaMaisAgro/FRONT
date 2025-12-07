@@ -20,7 +20,7 @@ export type OrderView = {
     dateLabel: string
     total: number
     deliveryDateLabel?: string
-    status: 'delivered' | 'pending'
+    status: 'delivered' | 'pending' | 'rejected'
     items: OrderItemView[]
     vendorLabel: string
     paymentCompleted: boolean
@@ -69,10 +69,16 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                 variant="secondary"
                                 className={`text-xs mb-2 ${order.status === 'delivered'
                                     ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                    : order.status === 'rejected'
+                                        ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
                                     }`}
                             >
-                                {order.status === 'delivered' ? 'Entregue' : 'Em andamento'}
+                                {order.status === 'delivered'
+                                    ? 'Entregue'
+                                    : order.status === 'rejected'
+                                        ? 'Recusado'
+                                        : 'Em andamento'}
                             </Badge>
 
                             {order.deliveryDateLabel && (
@@ -87,9 +93,9 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
 
                             <div className="flex flex-col gap-2">
                                 {!order.paymentCompleted && (
-                                    <Button 
+                                    <Button
                                         onClick={handlePayment}
-                                        className="bg-green-600 hover:bg-green-700 w-full text-sm h-9" 
+                                        className="bg-green-600 hover:bg-green-700 w-full text-sm h-9"
                                         size="sm"
                                     >
                                         <CreditCard className="w-4 h-4 mr-2" />
@@ -121,10 +127,16 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                         className={
                                             order.status === 'delivered'
                                                 ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                                : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                                : order.status === 'rejected'
+                                                    ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
                                         }
                                     >
-                                        {order.status === 'delivered' ? 'Entregue' : 'Em andamento'}
+                                        {order.status === 'delivered'
+                                            ? 'Entregue'
+                                            : order.status === 'rejected'
+                                                ? 'Recusado'
+                                                : 'Em andamento'}
                                     </Badge>
                                 </div>
                                 <div className="space-y-1">
@@ -146,9 +158,9 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
 
                             <div className="flex gap-2 flex-wrap">
                                 {!order.paymentCompleted && (
-                                    <Button 
+                                    <Button
                                         onClick={handlePayment}
-                                        className="bg-green-600 hover:bg-green-700 gap-2" 
+                                        className="bg-green-600 hover:bg-green-700 gap-2"
                                         size="sm"
                                     >
                                         <CreditCard className="w-4 h-4" />

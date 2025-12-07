@@ -3,8 +3,8 @@ import { notFound } from 'next/navigation'
 import React, { useEffect, useMemo, useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu'
-import { Search, ChevronDown, ShoppingCart } from 'lucide-react'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Search, ShoppingCart } from 'lucide-react'
 import OrderCard, { OrderView } from './components/OrderCard'
 import { Skeleton } from '@/components/ui/skeleton'
 import { formatDate } from '@/utils/functions'
@@ -18,6 +18,8 @@ function resolveProductName(bp: SaleBoughtProduct): string {
 export default function OrderHistoryPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [sortBy, setSortBy] = useState<'recent' | 'oldest' | 'price-high' | 'price-low'>('recent')
+  const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'delivered' | 'rejected'>('all')
+  const [periodFilter, setPeriodFilter] = useState<'all' | 'week' | 'fortnight' | 'month' | 'year'>('all')
   const [orders, setOrders] = useState<(OrderView & { createdAtISO: string })[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -51,13 +53,20 @@ export default function OrderHistoryPage() {
                 ? s.boughtProducts?.[0]?.product?.seller?.name ?? 'Vendedor desconhecido'
                 : 'Vendedor desconhecido'
 
+            let status: 'delivered' | 'pending' | 'rejected' = 'pending'
+            if (s.sellerApproved === false) {
+              status = 'rejected'
+            } else if (s.arrivedAt) {
+              status = 'delivered'
+            }
+
             return {
               id: s.id,
               dateLabel: formatDate(s.createdAt),
               createdAtISO: s.createdAt,
               total,
               deliveryDateLabel: s.arrivedAt ? formatDate(s.arrivedAt) : undefined,
-              status: s.arrivedAt ? 'delivered' : 'pending',
+              status,
               items,
               vendorLabel,
               paymentCompleted: s.paymentCompleted ?? false,
@@ -66,7 +75,7 @@ export default function OrderHistoryPage() {
           })
 
           setOrders(mapped)
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e: unknown) {
           if (!controller.signal.aborted) setOrders([])
         } finally {
@@ -79,11 +88,35 @@ export default function OrderHistoryPage() {
 
   const filteredOrders = useMemo(() => {
     const term = searchTerm.toLowerCase()
+    const now = new Date()
+
     const list = orders
       .filter((order) => {
+        // Text Search
         const matchVendor = (order.vendorLabel || '').toLowerCase().includes(term)
-        const matchItem = order.items.some((item) => (item.name || '').toLowerCase().includes(term))
-        return matchVendor || matchItem
+        const matchItem = order.items.some((item) => (item.name || '').toLowerCase().includes(term) || (item.quantityLabel || '').toLowerCase().includes(term))
+        const matchText = matchVendor || matchItem
+
+        // Status Filter
+        let matchStatus = true
+        if (statusFilter === 'pending') matchStatus = order.status === 'pending'
+        if (statusFilter === 'delivered') matchStatus = order.status === 'delivered'
+        if (statusFilter === 'rejected') matchStatus = order.status === 'rejected'
+
+        // Period Filter
+        let matchPeriod = true
+        if (periodFilter !== 'all') {
+          const orderDate = new Date(order.createdAtISO)
+          const diffTime = Math.abs(now.getTime() - orderDate.getTime())
+          const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+
+          if (periodFilter === 'week') matchPeriod = diffDays <= 7
+          if (periodFilter === 'fortnight') matchPeriod = diffDays <= 15
+          if (periodFilter === 'month') matchPeriod = diffDays <= 30
+          if (periodFilter === 'year') matchPeriod = diffDays <= 365
+        }
+
+        return matchText && matchStatus && matchPeriod
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -99,7 +132,7 @@ export default function OrderHistoryPage() {
         }
       })
     return list
-  }, [orders, searchTerm, sortBy])
+  }, [orders, searchTerm, sortBy, statusFilter, periodFilter])
 
   const SkeletonHeader = (
     <div className="hidden md:block max-w-6xl mx-auto space-y-4 px-4 py-6">
@@ -144,31 +177,55 @@ export default function OrderHistoryPage() {
         <>
           <div className="hidden md:block max-w-6xl mx-auto space-y-4 px-4 py-6">
             <h1 className="text-2xl font-bold text-gray-900">Histórico de pedidos</h1>
-            <div className="flex gap-4 items-center">
-              <div className="relative flex-1 max-w-md">
+            <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+              <div className="relative flex-1 w-full md:max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
                 <Input
-                  placeholder="Buscar todos os produtos"
+                  placeholder="Buscar produtos ou vendedores"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
-                  aria-label="Buscar pedidos por produto ou vendedor"
+                  aria-label="Buscar pedidos"
                 />
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="gap-2" aria-haspopup="menu">
-                    Filtrar e ordenar
-                    <ChevronDown className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent>
-                  <DropdownMenuItem onClick={() => setSortBy('recent')}>Mais recente</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('oldest')}>Mais antigo</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('price-high')}>Maior preço</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setSortBy('price-low')}>Menor preço</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+
+              <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
+                <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                  <SelectTrigger className="w-[140px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
+                    <SelectValue placeholder="Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Status</SelectItem>
+                    <SelectItem value="pending">Pendentes</SelectItem>
+                    <SelectItem value="delivered">Entregues</SelectItem>
+                    <SelectItem value="rejected">Recusados</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={periodFilter} onValueChange={(v: any) => setPeriodFilter(v)}>
+                  <SelectTrigger className="w-[150px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
+                    <SelectValue placeholder="Período" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Período</SelectItem>
+                    <SelectItem value="week">Última semana</SelectItem>
+                    <SelectItem value="fortnight">Última quinzena</SelectItem>
+                    <SelectItem value="month">Último mês</SelectItem>
+                    <SelectItem value="year">Último ano</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                  <SelectTrigger className="w-[140px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
+                    <SelectValue placeholder="Ordenar" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Ordenar</SelectItem>
+                    <SelectItem value="price-high">Maior preço</SelectItem>
+                    <SelectItem value="price-low">Menor preço</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
