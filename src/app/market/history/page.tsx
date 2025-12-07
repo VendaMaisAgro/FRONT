@@ -53,11 +53,40 @@ export default function OrderHistoryPage() {
                 ? s.boughtProducts?.[0]?.product?.seller?.name ?? 'Vendedor desconhecido'
                 : 'Vendedor desconhecido'
 
-            let status: 'delivered' | 'pending' | 'rejected' = 'pending'
-            if (s.sellerApproved === false) {
-              status = 'rejected'
-            } else if (s.arrivedAt) {
-              status = 'delivered'
+            let status: 'delivered' | 'pending' | 'rejected' | 'ready' | 'received' | 'completed' = 'pending'
+            let statusLabel = 'Em andamento'
+
+            // Mapping backend status to frontend status and label
+            switch (s.status) {
+              case 'Pedido realizado!':
+                status = 'received'
+                statusLabel = 'Pedido recebido'
+                break
+              case 'Disponível para retirada':
+                status = 'ready'
+                statusLabel = 'Pronto para retirada'
+                break
+              case 'Concluído':
+                status = 'completed'
+                statusLabel = 'Pedido concluído'
+                break
+              case 'Recusado pelo vendedor':
+                status = 'rejected'
+                statusLabel = 'Pedido recusado'
+                break
+              default:
+                // Fallback logic if status is unknown or not in the list
+                if (s.sellerApproved === false) {
+                  status = 'rejected'
+                  statusLabel = 'Pedido recusado'
+                } else if (s.arrivedAt) {
+                  status = 'completed'
+                  statusLabel = 'Pedido concluído'
+                } else {
+                  status = 'received'
+                  statusLabel = 'Pedido recebido'
+                }
+                break
             }
 
             return {
@@ -67,6 +96,7 @@ export default function OrderHistoryPage() {
               total,
               deliveryDateLabel: s.arrivedAt ? formatDate(s.arrivedAt) : undefined,
               status,
+              statusLabel,
               items,
               vendorLabel,
               paymentCompleted: s.paymentCompleted ?? false,
@@ -99,8 +129,8 @@ export default function OrderHistoryPage() {
 
         // Status Filter
         let matchStatus = true
-        if (statusFilter === 'pending') matchStatus = order.status === 'pending'
-        if (statusFilter === 'delivered') matchStatus = order.status === 'delivered'
+        if (statusFilter === 'pending') matchStatus = order.status === 'received' || order.status === 'ready' || order.status === 'pending'
+        if (statusFilter === 'delivered') matchStatus = order.status === 'completed' || order.status === 'delivered'
         if (statusFilter === 'rejected') matchStatus = order.status === 'rejected'
 
         // Period Filter

@@ -20,7 +20,8 @@ export type OrderView = {
     dateLabel: string
     total: number
     deliveryDateLabel?: string
-    status: 'delivered' | 'pending' | 'rejected'
+    status: 'delivered' | 'pending' | 'rejected' | 'ready' | 'received' | 'completed'
+    statusLabel: string
     items: OrderItemView[]
     vendorLabel: string
     paymentCompleted: boolean
@@ -67,18 +68,14 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                         <div className="flex-1 min-w-0">
                             <Badge
                                 variant="secondary"
-                                className={`text-xs mb-2 ${order.status === 'delivered'
-                                    ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                    : order.status === 'rejected'
+                                className={`text-xs mb-2 ${order.status === 'rejected'
                                         ? 'bg-red-100 text-red-800 hover:bg-red-100'
-                                        : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                        : order.status === 'ready'
+                                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                            : 'bg-green-100 text-green-800 hover:bg-green-100'
                                     }`}
                             >
-                                {order.status === 'delivered'
-                                    ? 'Entregue'
-                                    : order.status === 'rejected'
-                                        ? 'Recusado'
-                                        : 'Em andamento'}
+                                {order.statusLabel}
                             </Badge>
 
                             {order.deliveryDateLabel && (
@@ -125,18 +122,14 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                                     <Badge
                                         variant="secondary"
                                         className={
-                                            order.status === 'delivered'
-                                                ? 'bg-green-100 text-green-800 hover:bg-green-100'
-                                                : order.status === 'rejected'
-                                                    ? 'bg-red-100 text-red-800 hover:bg-red-100'
-                                                    : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                            order.status === 'rejected'
+                                                ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                                                : order.status === 'ready'
+                                                    ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                                    : 'bg-green-100 text-green-800 hover:bg-green-100'
                                         }
                                     >
-                                        {order.status === 'delivered'
-                                            ? 'Entregue'
-                                            : order.status === 'rejected'
-                                                ? 'Recusado'
-                                                : 'Em andamento'}
+                                        {order.statusLabel}
                                     </Badge>
                                 </div>
                                 <div className="space-y-1">
