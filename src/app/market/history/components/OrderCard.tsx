@@ -7,12 +7,14 @@ import { Eye, MessageSquare, ShoppingCart, CreditCard } from 'lucide-react'
 import React from 'react'
 import { useRouter } from 'next/navigation'
 import { isValidUUID } from '@/lib/validation'
+import Image from 'next/image'
 
 export type OrderItemView = {
     productId: number
     name: string
     quantityLabel: string
     imageEmoji?: string
+    imageUrl?: string
 }
 
 export type OrderView = {
@@ -62,17 +64,26 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                 </div>
                 <div className="p-4">
                     <div className="flex gap-3">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                            <div className="text-2xl">{order.items?.[0]?.imageEmoji || '🛒'}</div>
+                        <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden relative">
+                            {order.items?.[0]?.imageUrl ? (
+                                <Image
+                                    src={order.items[0].imageUrl}
+                                    alt={order.items[0].name}
+                                    fill
+                                    className="object-cover"
+                                />
+                            ) : (
+                                <div className="text-2xl">{order.items?.[0]?.imageEmoji || '🛒'}</div>
+                            )}
                         </div>
                         <div className="flex-1 min-w-0">
                             <Badge
                                 variant="secondary"
                                 className={`text-xs mb-2 ${order.status === 'rejected'
-                                        ? 'bg-red-100 text-red-800 hover:bg-red-100'
-                                        : order.status === 'ready'
-                                            ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
-                                            : 'bg-green-100 text-green-800 hover:bg-green-100'
+                                    ? 'bg-red-100 text-red-800 hover:bg-red-100'
+                                    : order.status === 'ready'
+                                        ? 'bg-yellow-100 text-yellow-800 hover:bg-yellow-100'
+                                        : 'bg-green-100 text-green-800 hover:bg-green-100'
                                     }`}
                             >
                                 {order.statusLabel}
@@ -114,8 +125,17 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                 <CardContent className="p-6">
                     <div className="flex items-start justify-between gap-6">
                         <div className="flex gap-4 flex-1">
-                            <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-3xl">
-                                {order.items?.[0]?.imageEmoji || '🛒'}
+                            <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-3xl overflow-hidden relative">
+                                {order.items?.[0]?.imageUrl ? (
+                                    <Image
+                                        src={order.items[0].imageUrl}
+                                        alt={order.items[0].name}
+                                        fill
+                                        className="object-cover"
+                                    />
+                                ) : (
+                                    <div className="text-3xl">{order.items?.[0]?.imageEmoji || '🛒'}</div>
+                                )}
                             </div>
                             <div className="flex-1 space-y-2">
                                 <div className="flex items-center gap-2">

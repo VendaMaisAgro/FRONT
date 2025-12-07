@@ -41,6 +41,7 @@ export default function OrderHistoryPage() {
                 productId: Number(bp.productId),
                 name: resolveProductName(bp),
                 quantityLabel: `${Number(bp.amount)} ${unit}`,
+                imageUrl: bp.product?.images_Path?.[0]
               }
             })
 
