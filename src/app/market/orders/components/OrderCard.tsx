@@ -63,11 +63,15 @@ export function OrderCard({
             </div>
             <div className="col-span-2 md:col-start-5 flex items-center justify-end gap-2">
               <span className="text-sm text-muted-foreground">Status atual:</span>
-              <span className="font-medium text-sm">
-                {order.status === 'new' && 'Novo'}
-                {order.status === 'processing' && 'Processando'}
-                {order.status === 'pickup' && 'Pronto para retirada'}
-                {order.status === 'completed' && 'Concluído'}
+              <span className={`font-medium text-sm ${order.action === 'rejected' ? 'text-red-600' : ''}`}>
+                {order.action === 'rejected' ? 'Recusado' : (
+                  <>
+                    {order.status === 'new' && 'Novo'}
+                    {order.status === 'processing' && 'Processando'}
+                    {order.status === 'pickup' && 'Pronto para retirada'}
+                    {order.status === 'completed' && 'Concluído'}
+                  </>
+                )}
               </span>
             </div>
           </div>
