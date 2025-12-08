@@ -453,8 +453,7 @@ export default function PaymentPage() {
 
 								<div className="pt-4 border-t">
 									<p className="text-xs text-gray-500 text-center">
-										Você será redirecionado para o Mercado Pago para finalizar o
-										pagamento
+										Você será redirecionado para a plataforma de pagamento para concluir seu pedido.
 									</p>
 								</div>
 							</CardContent>
