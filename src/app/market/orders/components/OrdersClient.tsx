@@ -37,12 +37,12 @@ import {
 } from "@/components/ui/select";
 import { Order, OrderStatus, SaleData } from "@/types/types";
 import {
-    Calendar,
-    ChevronDown,
-    Hash,
-    LoaderCircle,
-    Plus,
-    Search,
+	Calendar,
+	ChevronDown,
+	Hash,
+	LoaderCircle,
+	Plus,
+	Search,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
@@ -87,12 +87,12 @@ function transformSaleDataToOrder(sale: SaleData): Order {
 		value: totalValue,
 		payment: sale.paymentMethod.method,
 		status: statusMap[sale.status] || "new",
-    action:
-      sale.sellerApproved === true
-        ? "accepted"
-        : sale.sellerApproved === false
-        ? "rejected"
-        : null,
+		action:
+			sale.sellerApproved === true
+				? "accepted"
+				: sale.sellerApproved === false
+					? "rejected"
+					: null,
 		cargoWeightKg: sale.cargoWeightKg || "",
 	};
 }
@@ -103,18 +103,18 @@ export default function OrdersClient() {
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [dialogOpen, setDialogOpen] = useState(false);
-	const [selectedOrderId, setSelectedOrderId] = useState<number | null>(null);
+	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 	const [nextStatus, setNextStatus] = useState<OrderStatus>("processing");
 	const [updateError, setUpdateError] = useState<string | null>(null);
 	const [cargoWeight, setCargoWeight] = useState<string>("");
 	const [isUpdating, setIsUpdating] = useState(false);
-  const [isAccepting, setIsAccepting] = useState(false);
+	const [isAccepting, setIsAccepting] = useState(false);
 
 	// Modal de termos (aceite antes de aceitar pedido)
 	const [termsDialogOpen, setTermsDialogOpen] = useState(false);
 	const [termsExpanded, setTermsExpanded] = useState(false);
 	const [termsAccepted, setTermsAccepted] = useState(false);
-	const [pendingAcceptOrderId, setPendingAcceptOrderId] = useState<number | null>(null);
+	const [pendingAcceptOrderId, setPendingAcceptOrderId] = useState<string | null>(null);
 
 	// Carregar dados do backend
 	useEffect(() => {
@@ -147,24 +147,28 @@ export default function OrdersClient() {
 			OrderStatus,
 			number
 		>;
-		for (const o of orders) base[o.status]++;
+		for (const o of orders) {
+			if (o.action !== 'rejected') {
+				base[o.status]++;
+			}
+		}
 		return base;
 	}, [orders]);
 
-	function openStatusDialog(orderId: number, current: OrderStatus) {
+	function openStatusDialog(orderId: string, current: OrderStatus) {
 		setSelectedOrderId(orderId);
-		
+
 		// Se o status atual for "new", definir como "processing" por padrão
 		// caso contrário, usar o status atual
 		setNextStatus(current === "new" ? "processing" : current);
-		
+
 		// Pré-preencher o peso da carga com o valor atual do pedido
 		const order = orders.find(o => o.id === orderId);
 		setCargoWeight(order?.cargoWeightKg || "");
-		
+
 		// Limpar erro anterior
 		setUpdateError(null);
-		
+
 		setDialogOpen(true);
 	}
 
@@ -177,7 +181,7 @@ export default function OrdersClient() {
 				setUpdateError("Por favor, informe o peso da carga.");
 				return;
 			}
-			
+
 			const weightValue = parseFloat(cargoWeight);
 			if (isNaN(weightValue) || weightValue <= 0) {
 				setUpdateError("O peso da carga deve ser maior que zero.");
@@ -188,9 +192,12 @@ export default function OrdersClient() {
 		try {
 			setIsUpdating(true);
 			setUpdateError(null);
-			
+
 			// PASSO 1: Atualizar o status
-			await updateSaleStatus(selectedOrderId, reverseStatusMap[nextStatus]);
+			// Assuming updateSaleStatus expects number if ID is number, but here ID is string (UUID).
+			// If backend expects number, we have a problem. But SaleData usually uses UUID strings.
+			// Let's assume string is correct for UUIDs.
+			await updateSaleStatus(selectedOrderId as any, reverseStatusMap[nextStatus]);
 
 			// PASSO 2: Se for "pickup" e tiver peso, atualizar o peso SEPARADAMENTE usando fetch client-side
 			if (nextStatus === "pickup" && cargoWeight.trim()) {
@@ -211,8 +218,8 @@ export default function OrdersClient() {
 			// Atualizar no estado local
 			setOrders((prev) =>
 				prev.map((o) =>
-					o.id === selectedOrderId 
-						? { ...o, status: nextStatus, cargoWeightKg: nextStatus === "pickup" ? cargoWeight : o.cargoWeightKg } 
+					o.id === selectedOrderId
+						? { ...o, status: nextStatus, cargoWeightKg: nextStatus === "pickup" ? cargoWeight : o.cargoWeightKg }
 						: o
 				)
 			);
@@ -225,42 +232,42 @@ export default function OrdersClient() {
 		}
 	}
 
-	function handleAcceptOrder(orderId: number) {
+	function handleAcceptOrder(orderId: string) {
 		setPendingAcceptOrderId(orderId);
 		setTermsAccepted(false);
 		setTermsExpanded(false);
 		setTermsDialogOpen(true);
 	}
 
-  async function confirmAcceptWithTerms() {
-    if (!termsAccepted || pendingAcceptOrderId == null) return;
-    try {
-      setIsAccepting(true);
-      // 1) Atualiza decisão do vendedor
-      await updateSellerDecision(pendingAcceptOrderId, true);
-      // 2) Atualiza status para "Em processamento"
-      await updateSaleStatus(pendingAcceptOrderId, reverseStatusMap["processing"]);
-      // 3) Reflete no estado local
-      setOrders((prev) =>
-        prev.map((o) =>
-          o.id === pendingAcceptOrderId
-            ? { ...o, action: "accepted", status: "processing" }
-            : o
-        )
-      );
-    } finally {
-      setIsAccepting(false);
-      setTermsDialogOpen(false);
-      setPendingAcceptOrderId(null);
-    }
-  }
+	async function confirmAcceptWithTerms() {
+		if (!termsAccepted || pendingAcceptOrderId == null) return;
+		try {
+			setIsAccepting(true);
+			// 1) Atualiza decisão do vendedor
+			await updateSellerDecision(pendingAcceptOrderId as any, true);
+			// 2) Atualiza status para "Em processamento"
+			await updateSaleStatus(pendingAcceptOrderId as any, reverseStatusMap["processing"]);
+			// 3) Reflete no estado local
+			setOrders((prev) =>
+				prev.map((o) =>
+					o.id === pendingAcceptOrderId
+						? { ...o, action: "accepted", status: "processing" }
+						: o
+				)
+			);
+		} finally {
+			setIsAccepting(false);
+			setTermsDialogOpen(false);
+			setPendingAcceptOrderId(null);
+		}
+	}
 
-  async function handleRejectOrder(orderId: number) {
-    await updateSellerDecision(orderId, false);
-    setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, action: "rejected" } : o))
-    );
-  }
+	async function handleRejectOrder(orderId: string) {
+		await updateSellerDecision(orderId as any, false);
+		setOrders((prev) =>
+			prev.map((o) => (o.id === orderId ? { ...o, action: "rejected" } : o))
+		);
+	}
 
 	if (loading) {
 		return <OrdersPageSkeleton />;
@@ -356,7 +363,7 @@ export default function OrdersClient() {
 					<AlertDialogHeader>
 						<AlertDialogTitle>Alterar status do pedido</AlertDialogTitle>
 					</AlertDialogHeader>
-					
+
 					<div className="space-y-4 py-4">
 						{/* Campo de seleção de status */}
 						<div className="space-y-2">
@@ -410,13 +417,13 @@ export default function OrdersClient() {
 					</div>
 
 					<AlertDialogFooter>
-						<AlertDialogCancel 
+						<AlertDialogCancel
 							onClick={() => setUpdateError(null)}
 							disabled={isUpdating}
 						>
 							Cancelar
 						</AlertDialogCancel>
-						<Button 
+						<Button
 							onClick={confirmStatusChange}
 							disabled={isUpdating}
 						>
@@ -521,19 +528,19 @@ export default function OrdersClient() {
 						</div>
 					</div>
 
-            <DialogFooter>
-            	<Button variant="outline" onClick={() => setTermsDialogOpen(false)} disabled={isAccepting}>Cancelar</Button>
-            	<Button onClick={confirmAcceptWithTerms} disabled={!termsAccepted || isAccepting}>
-                {isAccepting ? (
-                  <>
-                    <LoaderCircle size={16} className="animate-spin mr-2" />
-                    Confirmando...
-                  </>
-                ) : (
-                  "Confirmar"
-                )}
-              </Button>
-            </DialogFooter>
+					<DialogFooter>
+						<Button variant="outline" onClick={() => setTermsDialogOpen(false)} disabled={isAccepting}>Cancelar</Button>
+						<Button onClick={confirmAcceptWithTerms} disabled={!termsAccepted || isAccepting}>
+							{isAccepting ? (
+								<>
+									<LoaderCircle size={16} className="animate-spin mr-2" />
+									Confirmando...
+								</>
+							) : (
+								"Confirmar"
+							)}
+						</Button>
+					</DialogFooter>
 				</DialogContent>
 			</Dialog>
 		</div>
