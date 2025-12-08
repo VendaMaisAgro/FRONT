@@ -3,6 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Eye, RefreshCcw, CheckCircle2, XCircle, Info } from "lucide-react";
 import { moneyMask } from "@/utils/functions";
 import { Order } from "@/types/types";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export function OrderCard({
   order,
@@ -84,13 +95,31 @@ export function OrderCard({
                 >
                   <CheckCircle2 className="size-4" /> Aceitar
                 </Button>
-                <Button
-                  variant="destructive"
-                  className="flex-1 gap-2"
-                  onClick={onReject}
-                >
-                  <XCircle className="size-4" /> Recusar
-                </Button>
+
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant="destructive"
+                      className="flex-1 gap-2"
+                    >
+                      <XCircle className="size-4" /> Recusar
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>Recusar Pedido</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        Tem certeza que deseja recusar este pedido? Esta ação não pode ser desfeita.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={onReject} className="bg-red-600 hover:bg-red-700">
+                        Confirmar Recusa
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
               </>
             )}
 
