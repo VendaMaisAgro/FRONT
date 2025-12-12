@@ -15,7 +15,11 @@ export async function GET(
 	}
 
 	try {
-		const res = await fetch(`${process.env.API_URL}/products/${id}`, {
+		const cleanId = id.trim();
+		const url = `${process.env.API_URL}/products/${cleanId}`;
+		console.log(`[GET Debug] Fetching: ${url} (Original ID: "${id}")`);
+
+		const res = await fetch(url, {
 			method: "GET",
 			headers: {
 				Authorization: `Bearer ${token.jwt}`,
