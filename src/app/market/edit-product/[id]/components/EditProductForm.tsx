@@ -162,7 +162,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
 					category: data.category,
 					amount: data.stock.toString(),
 					description: data.description,
-					sellingUnits: data.sellingUnitsProduct.map(
+					sellingUnits: data.sellingUnitProduct.map(
 						(su: {
 							minPrice: number;
 							unitId: number;
@@ -308,7 +308,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
 				unitId: u.unitId, // Mantém como string (esperado pelo Prisma)
 				minPrice: removeMoneyMask(u.minPrice),
 			}));
-			formData.append('sellingUnitsProduct', JSON.stringify(sellingUnitsPayload));
+			formData.append('sellingUnitProduct', JSON.stringify(sellingUnitsPayload));
 
 			// Adicionar URLs existentes (imagens antigas que devem ser mantidas)
 			formData.append('existingImages', JSON.stringify(existingImageUrls));
@@ -386,11 +386,10 @@ export default function EditProductForm({ productId }: { productId: string }) {
 													className="basis-1/5 min-[520px]:basis-1/4 min-[520px]:pt-5"
 												>
 													<li
-														className={`relative size-12 mx-auto list-none ${
-															selectedImageIndex === idx
-																? 'ring-2 rounded-md ring-primary transition-all duration-300'
-																: ''
-														}`}
+														className={`relative size-12 mx-auto list-none ${selectedImageIndex === idx
+															? 'ring-2 rounded-md ring-primary transition-all duration-300'
+															: ''
+															}`}
 													>
 														<button
 															onClick={() => handleThumbnailClick(idx)}
@@ -409,19 +408,17 @@ export default function EditProductForm({ productId }: { productId: string }) {
 											))}
 										</CarouselContent>
 										<CarouselPrevious
-											className={`z-10 sm:size-7 ${
-												isMobile
-													? 'absolute -left-[20px] top-1/2 -translate-y-1/2'
-													: 'absolute left-1/2 -translate-x-1/2 -top-4'
-											}`}
+											className={`z-10 sm:size-7 ${isMobile
+												? 'absolute -left-[20px] top-1/2 -translate-y-1/2'
+												: 'absolute left-1/2 -translate-x-1/2 -top-4'
+												}`}
 										/>
 
 										<CarouselNext
-											className={`z-10 sm:size-7 ${
-												isMobile
-													? 'absolute -right-[20px] top-1/2 -translate-y-1/2'
-													: 'absolute left-1/2 -translate-x-1/2 -bottom-1'
-											}`}
+											className={`z-10 sm:size-7 ${isMobile
+												? 'absolute -right-[20px] top-1/2 -translate-y-1/2'
+												: 'absolute left-1/2 -translate-x-1/2 -bottom-1'
+												}`}
 										/>
 									</>
 								)}
@@ -546,7 +543,7 @@ export default function EditProductForm({ productId }: { productId: string }) {
 														{(() => {
 															const varieties =
 																fruitVarieties[
-																	productName.toLowerCase() as keyof typeof fruitVarieties
+																productName.toLowerCase() as keyof typeof fruitVarieties
 																] || [];
 
 															return (
