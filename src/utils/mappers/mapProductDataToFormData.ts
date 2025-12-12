@@ -20,7 +20,7 @@ export function mapProductDataToFormData(
 			unitId: s.unitId,
 		}))
 	);
-	formData.append('sellingUnitsProduct', sellingUnitsJson);
+	formData.append('sellingUnitProduct', sellingUnitsJson);
 
 	values.images.forEach((file) => {
 		formData.append('images', file);
@@ -52,7 +52,7 @@ export function mapEditProductDataToFormData(
 			unitId: s.unitId,
 		}))
 	);
-	formData.append('sellingUnitsProduct', sellingUnitsJson);
+	formData.append('sellingUnitProduct', sellingUnitsJson);
 
 	// Separar imagens existentes (URLs do S3) de novas imagens (Files)
 	const existingImages: string[] = [];

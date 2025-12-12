@@ -59,7 +59,7 @@ export default async function ProductDetail({
 				id={res.id}
 				name={res.name}
 				images={images}
-				units={res.sellingUnitsProduct}
+				units={res.sellingUnitProduct}
 				sellerId={res.seller.id}
 				sellerName={res.seller.name}
 				createdAt={res.createdAt}

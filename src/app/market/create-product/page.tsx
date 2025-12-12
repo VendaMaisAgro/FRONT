@@ -39,7 +39,7 @@ export default function CadastrarProduto() {
 						category: data.category,
 						amount: data.stock.toString(),
 						description: data.description,
-						sellingUnits: data.sellingUnitsProduct.map(
+						sellingUnits: data.sellingUnitProduct.map(
 							(su: {
 								minPrice: number;
 								unitId: string;

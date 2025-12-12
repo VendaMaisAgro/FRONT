@@ -57,7 +57,7 @@ export default function ProductListClient({
 	return (
 		<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 			{products.map((p) => {
-				const firstUnit = p.sellingUnitsProduct[0];
+				const firstUnit = p.sellingUnitProduct[0];
 				return (
 					<ProductCard
 						key={p.id}
@@ -66,8 +66,8 @@ export default function ProductListClient({
 							images: p.images_Path,
 							name: p.name,
 							category: p.category,
-							price: firstUnit.minPrice,
-							sellingUnit: firstUnit.unit.unit,
+							price: firstUnit?.minPrice ?? 0,
+							sellingUnit: firstUnit?.unit?.unit ?? 'Indisponível',
 							createdAt: p.createdAt,
 							harvestAt: p.harvestAt,
 							isNegotiable: p.isNegotiable,
