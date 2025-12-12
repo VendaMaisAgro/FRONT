@@ -69,7 +69,7 @@ const CompraProduto = ({
 		minPrice: number;
 		productId: string;
 		unit: { unit: string; title: string };
-	}>(units[0]);
+	}>(units?.[0] ?? null);
 	// const [selectedImage, setSelectedImage] = useState(0);
 	const [showPaymentModal, setShowPaymentModal] = useState(false);
 	const router = useRouter();
@@ -89,8 +89,7 @@ const CompraProduto = ({
 
 			if (!res.success) {
 				toast.error(
-					`Erro ao adicionar ${quantity} ${selectedUnit.unit.unit}${
-						quantity > 1 ? 's' : ''
+					`Erro ao adicionar ${quantity} ${selectedUnit.unit.unit}${quantity > 1 ? 's' : ''
 					} de ${productName} ao carrinho.`
 				);
 				return;
@@ -102,8 +101,7 @@ const CompraProduto = ({
 			});
 
 			toast.success(
-				`${quantity} ${selectedUnit.unit.unit}${
-					quantity > 1 ? 's' : ''
+				`${quantity} ${selectedUnit.unit.unit}${quantity > 1 ? 's' : ''
 				} de ${productName} adicionado ao carrinho!`
 			);
 			return;
@@ -260,9 +258,8 @@ const CompraProduto = ({
 					Anunciado em: {formatDate(createdAt)}
 				</p>
 				<div
-					className={`${
-						harvestAtStyles[harvestStatus()].color
-					} flex gap-1 items-center text-sm mt-1`}
+					className={`${harvestAtStyles[harvestStatus()].color
+						} flex gap-1 items-center text-sm mt-1`}
 				>
 					<Tooltip>
 						<TooltipTrigger asChild>
@@ -278,10 +275,16 @@ const CompraProduto = ({
 				<div className="mt-6">
 					<h4>Preço mínimo</h4>
 					<div className="text-3xl font-bold text-gray-900">
-						R$ {selectedUnit.minPrice.toFixed(2).replace('.', ',')}
-						<span className="text-primary text-sm">
-							/{selectedUnit.unit.unit}
-						</span>
+						{selectedUnit ? (
+							<>
+								R$ {selectedUnit.minPrice.toFixed(2).replace('.', ',')}
+								<span className="text-primary text-sm">
+									/{selectedUnit.unit.unit}
+								</span>
+							</>
+						) : (
+							<span className="text-gray-500 text-xl">Indisponível</span>
+						)}
 					</div>
 				</div>
 				<div className="mt-8">
@@ -314,13 +317,13 @@ const CompraProduto = ({
 							<span className="text-gray-700 mr-2">Und.</span>
 							<select
 								onChange={(e) => {
-									setSelectedUnit(
-										units.find((u) => u.unitId === e.target.value)!
-									);
+									const unit = units.find((u) => u.unitId === e.target.value);
+									if (unit) setSelectedUnit(unit);
 								}}
 								className="border border-gray-300 rounded py-1 px-2 bg-white"
+								disabled={!units || units.length === 0}
 							>
-								{units.map((u) => {
+								{units && units.map((u) => {
 									return (
 										<option key={u.id} value={u.unitId}>
 											{u.unit.unit}
@@ -345,8 +348,9 @@ const CompraProduto = ({
 				<div className="flex flex-col mt-8 gap-4">
 					<button
 						type="button"
-						className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-green-700 rounded-md text-green-700 cursor-pointer"
+						className="flex items-center justify-center gap-2 py-3 px-4 border-2 border-green-700 rounded-md text-green-700 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={handleAddNewProduct}
+						disabled={!selectedUnit}
 					>
 						<ShoppingCart size={20} />
 						<span>Adicionar ao Carrinho</span>
@@ -370,8 +374,9 @@ const CompraProduto = ({
 					)}
 					<button
 						type="button"
-						className="py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition cursor-pointer"
+						className="py-3 px-4 bg-green-600 text-white rounded-md hover:bg-green-700 transition cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
 						onClick={comprarAgora}
+						disabled={!selectedUnit}
 					>
 						Comprar Agora
 					</button>

@@ -15,10 +15,16 @@ export default function MarketProductCard({
 				<div className="px-4 py-2">
 					<h4 className="text-lg">{product.name}</h4>
 					<h3 className="font-semibold text-2xl text-primary">
-						R$ {moneyMask(product.sellingUnitsProduct[0].minPrice)}
-						<span className="text-sm text-gray-3 font-normal">
-							/{product.sellingUnitsProduct[0].unit.unit}
-						</span>
+						{product.sellingUnitProduct?.[0] ? (
+							<>
+								R$ {moneyMask(product.sellingUnitProduct[0].minPrice)}
+								<span className="text-sm text-gray-3 font-normal">
+									/{product.sellingUnitProduct[0].unit.unit}
+								</span>
+							</>
+						) : (
+							<span className="text-sm text-gray-500">Indisponível</span>
+						)}
 					</h3>
 					{product.seller && (
 						<h4 className="text-sm text-gray-600">

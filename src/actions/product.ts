@@ -109,7 +109,7 @@ export async function removeProductAction(id: string): Promise<boolean> {
 			return false;
 		}
 
-		revalidatePath("/martket/myproducts");
+		revalidatePath("/market/myproducts");
 
 		return true;
 	} catch (error) {

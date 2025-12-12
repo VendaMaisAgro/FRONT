@@ -137,7 +137,7 @@ export type ProductToApi = {
 	description: string;
 	harvestAt: Date;
 	isNegotiable: boolean;
-	sellingUnitsProduct: {
+	sellingUnitProduct: {
 		unitId: string;
 		minPrice: number;
 	}[];
@@ -152,13 +152,13 @@ export type SellerProductList = {
 	harvestAt: string;
 	isNegotiable: boolean;
 	createdAt: string;
-	sellingUnitsProduct: SellingUnitProduct[];
+	sellingUnitProduct: SellingUnitProduct[];
 };
 
 export type MarketProductCardType = {
 	id: string;
 	name: string;
-	sellingUnitsProduct: Omit<
+	sellingUnitProduct: Omit<
 		SellingUnitProduct,
 		'id' | 'productId' | 'unitId'
 	>[];
