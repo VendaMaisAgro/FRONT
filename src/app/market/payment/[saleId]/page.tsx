@@ -203,9 +203,9 @@ export default function PaymentPage() {
 			} else {
 				setError('URL de pagamento não foi retornada')
 			}
-		} catch (err: any) {
+		} catch (err: unknown) {
 			console.error('Erro ao processar pagamento:', err)
-			setError(err.message || 'Erro ao processar pagamento')
+			setError(err instanceof Error ? err.message : 'Erro ao processar pagamento')
 		} finally {
 			setProcessing(false)
 		}
