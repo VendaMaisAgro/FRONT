@@ -6,7 +6,7 @@ import { SalesApiResponse } from "@/types/types";
 export async function getSalesData(): Promise<SalesApiResponse> {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
-  
+
 
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/sales`, {
@@ -53,7 +53,7 @@ export async function updateSaleStatus(saleId: string, status: string): Promise<
 }
 
 export async function updateSellerDecision(
-  saleId: number,
+  saleId: string,
   approved: boolean | null
 ): Promise<void> {
   const cookieStore = await cookies();

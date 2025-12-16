@@ -47,11 +47,11 @@ export async function createPaymentPreference(params: CreatePaymentPreferencePar
 				init_point: data.init_point,
 			},
 		};
-	} catch (error: any) {
+	} catch (error: unknown) {
 		console.error("Erro ao criar preferência de pagamento:", error);
 		return {
 			success: false,
-			message: error.message || "Erro interno ao criar preferência de pagamento",
+			message: error instanceof Error ? error.message : "Erro interno ao criar preferência de pagamento",
 		};
 	}
 }

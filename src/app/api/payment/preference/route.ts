@@ -1,7 +1,7 @@
 import { verifySession } from "@/lib/session";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
-import { isValidUUID, validatePaymentData } from "@/lib/validation";
+import { validatePaymentData } from "@/lib/validation";
 
 async function auth() {
 	const token = (await cookies()).get("session")?.value;
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 			// Passar a mensagem de erro do backend, especialmente para erros do Mercado Pago
 			const errorMessage = data.message || data.error || "Erro ao criar preferência de pagamento";
 			return NextResponse.json(
-				{ 
+				{
 					error: errorMessage,
 					message: errorMessage // Garantir que a mensagem esteja disponível
 				},

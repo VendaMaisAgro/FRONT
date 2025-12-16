@@ -3,7 +3,6 @@
 import { getSalesData, updateSaleStatus, updateSellerDecision } from "@/actions/sales";
 import {
 	AlertDialog,
-	AlertDialogAction,
 	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogFooter,
@@ -197,7 +196,7 @@ export default function OrdersClient() {
 			// Assuming updateSaleStatus expects number if ID is number, but here ID is string (UUID).
 			// If backend expects number, we have a problem. But SaleData usually uses UUID strings.
 			// Let's assume string is correct for UUIDs.
-			await updateSaleStatus(selectedOrderId as any, reverseStatusMap[nextStatus]);
+			await updateSaleStatus(selectedOrderId, reverseStatusMap[nextStatus]);
 
 			// PASSO 2: Se for "pickup" e tiver peso, atualizar o peso SEPARADAMENTE usando fetch client-side
 			if (nextStatus === "pickup" && cargoWeight.trim()) {
@@ -244,9 +243,9 @@ export default function OrdersClient() {
 		try {
 			setIsAccepting(true);
 			// 1) Atualiza decisão do vendedor
-			await updateSellerDecision(pendingAcceptOrderId as any, true);
+			await updateSellerDecision(pendingAcceptOrderId, true);
 			// 2) Atualiza status para "Em processamento"
-			await updateSaleStatus(pendingAcceptOrderId as any, reverseStatusMap["processing"]);
+			await updateSaleStatus(pendingAcceptOrderId, reverseStatusMap["processing"]);
 			// 3) Reflete no estado local
 			setOrders((prev) =>
 				prev.map((o) =>
@@ -263,7 +262,7 @@ export default function OrdersClient() {
 	}
 
 	async function handleRejectOrder(orderId: string) {
-		await updateSellerDecision(orderId as any, false);
+		await updateSellerDecision(orderId, false);
 		setOrders((prev) =>
 			prev.map((o) => (o.id === orderId ? { ...o, action: "rejected" } : o))
 		);

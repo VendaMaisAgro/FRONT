@@ -88,7 +88,7 @@ export default function OrderHistoryPage() {
               vendorLabel,
               paymentCompleted: s.paymentCompleted ?? false,
               paymentMethodId: s.paymentMethodId,
-              sellerApproved: s.sellerApproved
+              sellerApproved: s.sellerApproved ?? null
             }
           })
 
@@ -208,7 +208,7 @@ export default function OrderHistoryPage() {
               </div>
 
               <div className="flex gap-2 w-full md:w-auto overflow-x-auto pb-2 md:pb-0">
-                <Select value={statusFilter} onValueChange={(v: any) => setStatusFilter(v)}>
+                <Select value={statusFilter} onValueChange={(v: 'all' | 'pending' | 'delivered' | 'rejected') => setStatusFilter(v)}>
                   <SelectTrigger className="w-[140px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
@@ -220,7 +220,7 @@ export default function OrderHistoryPage() {
                   </SelectContent>
                 </Select>
 
-                <Select value={periodFilter} onValueChange={(v: any) => setPeriodFilter(v)}>
+                <Select value={periodFilter} onValueChange={(v: 'all' | 'week' | 'fortnight' | 'month' | 'year') => setPeriodFilter(v)}>
                   <SelectTrigger className="w-[150px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
                     <SelectValue placeholder="Período" />
                   </SelectTrigger>
@@ -233,7 +233,7 @@ export default function OrderHistoryPage() {
                   </SelectContent>
                 </Select>
 
-                <Select value={sortBy} onValueChange={(v: any) => setSortBy(v)}>
+                <Select value={sortBy} onValueChange={(v: 'recent' | 'oldest' | 'price-high' | 'price-low') => setSortBy(v)}>
                   <SelectTrigger className="w-[140px] bg-white hover:bg-accent hover:text-accent-foreground font-semibold">
                     <SelectValue placeholder="Ordenar" />
                   </SelectTrigger>
