@@ -37,9 +37,12 @@ export async function POST(request: NextRequest) {
       body: productData,
     });
 
-    return NextResponse.json({ status: res.status });
+    const data = await res.json().catch(() => ({})); // Safe parse in case of empty body
+
+    return NextResponse.json(data, { status: res.status });
   } catch (err) {
-    console.log(err);
+    console.error("Erro no proxy de produtos:", err);
+    return NextResponse.json({ error: "Erro interno ao processar requisição" }, { status: 500 });
   }
 }
 
