@@ -42,7 +42,7 @@ export default function CreateProductForm({
 
 		const res = await createProduct(values);
 
-		if (res.status === 200) {
+		if (res.status === 200 || res.status === 201) {
 			toast.success(`${values.name} cadastrado com sucesso!`);
 			router.push('/market/myproducts');
 			return;
