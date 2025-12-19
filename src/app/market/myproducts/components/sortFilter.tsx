@@ -39,7 +39,7 @@ export function SortFilter() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
+        <Button variant="outline" className="w-full justify-between">
           Filtrar e ordenar
           <ChevronDown />
         </Button>
