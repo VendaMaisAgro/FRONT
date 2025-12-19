@@ -3,11 +3,11 @@ import { SortFilter } from "./sortFilter";
 
 export default function ProductsFilterForm() {
   return (
-    <form className="flex justify-between mb-6">
-      <div className="relative w-1/3">
+    <form className="flex flex-col md:flex-row justify-between mb-6 gap-3">
+      <div className="relative w-full md:w-1/3">
         <input
           type="text"
-          placeholder="Buscar todos os produtos"
+          placeholder="Buscar produto"
           className="w-full p-2 pl-8 border rounded-md"
         />
         <svg
@@ -25,12 +25,16 @@ export default function ProductsFilterForm() {
           />
         </svg>
       </div>
-      <SortFilter />
-      <Link href="/market/create-product">
-        <button className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700">
-          Cadastrar Produto
-        </button>
-      </Link>
+      <div className="flex gap-2 w-full md:w-auto">
+        <div className="w-1/2 md:w-auto">
+          <SortFilter />
+        </div>
+        <Link href="/market/create-product" className="w-1/2 md:w-auto">
+          <button className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 w-full md:w-auto h-10">
+            Cadastrar Produto
+          </button>
+        </Link>
+      </div>
     </form>
   );
 }
