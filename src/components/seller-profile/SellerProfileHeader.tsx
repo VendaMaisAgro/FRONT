@@ -46,7 +46,7 @@ export default function SellerProfileHeader({
                                     <span className="inline-flex items-center px-2 py-1 rounded-md text-[11px] md:text-xs font-medium text-gray-600 bg-gray-100 w-max">
                                         Loja oficial
                                     </span>
-                                    <h1 className="mt-1 text-xl md:text-2xl lg:text-3xl font-semibold text-gray-900">
+                                    <h1 className="mt-1 text-lg md:text-xl lg:text-2xl font-semibold text-gray-900">
                                         {name}
                                     </h1>
                                 </div>
