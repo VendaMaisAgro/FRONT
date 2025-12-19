@@ -50,7 +50,7 @@ export default function Sidemenu({ handleLogout }: SidemenuProps) {
 							</div>
 							<div className="flex flex-col text-white">
 								<h3 className="text-md font-semibold">{user.email}</h3>
-								<Link href="#" className="flex items-center text-sm">
+								<Link href="/market/profile" className="flex items-center text-sm">
 									Meu Perfil <ChevronRight size={16} />
 								</Link>
 							</div>
