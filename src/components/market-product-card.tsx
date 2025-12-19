@@ -17,7 +17,7 @@ export default function MarketProductCard({
 					<h3 className="font-semibold text-2xl text-primary">
 						{product.sellingUnitProduct?.[0] ? (
 							<>
-								R$ {moneyMask(product.sellingUnitProduct[0].minPrice)}
+								{moneyMask(product.sellingUnitProduct[0].minPrice)}
 								<span className="text-sm text-gray-3 font-normal">
 									/{product.sellingUnitProduct[0].unit.unit}
 								</span>
