@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useUserStore } from "@/store/userInfoStore";
 import { sectionsListData } from "@/utils/data";
-import { ChevronRight } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -59,13 +59,21 @@ export default function Sidemenu({ handleLogout }: SidemenuProps) {
 				)}
 			</SheetHeader>
 			<div className="overflow-scroll">
+				<div className="px-4 py-4 border-b border-b-gray-5/70">
+					<Link
+						href="/market"
+						className="flex gap-2 items-center text-gray-2 hover:text-neutral-900 transition-colors duration-150"
+					>
+						<Home size={20} />
+						<h6>Início</h6>
+					</Link>
+				</div>
 				{sectionsListData.map((g, _) => {
 					return (
 						<div
 							key={_}
-							className={`${
-								_ === 0 ? "px-4 pt-2 pb-4" : "p-4 border-t border-t-gray-5/70"
-							}`}
+							className={`${_ === 0 ? "px-4 pt-2 pb-4" : "p-4 border-t border-t-gray-5/70"
+								}`}
 						>
 							<h4 className="text-gray-3 text-sm mb-4">{g.group}</h4>
 							<ul className="space-y-3">
