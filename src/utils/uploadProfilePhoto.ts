@@ -4,15 +4,23 @@ export async function uploadProfilePhoto(file: File) {
   const formData = new FormData()
   formData.append('img', file)
 
-   try {
+  try {
     const res = await fetch('/api/user/profile-photo', {
       method: 'PUT',
       body: formData,
     })
 
     if (!res.ok) {
-      const error = await res.json()
-      return { success: false, error: error.error || 'Erro ao atualizar foto de perfil' }
+      if (res.status === 413) {
+        return { success: false, error: 'A imagem é muito grande. Tamanho máximo: 5MB' }
+      }
+
+      try {
+        const error = await res.json()
+        return { success: false, error: error.error || 'Erro ao atualizar foto de perfil' }
+      } catch {
+        return { success: false, error: `Erro no servidor: ${res.status} ${res.statusText}` }
+      }
     }
 
     const data = await res.json()

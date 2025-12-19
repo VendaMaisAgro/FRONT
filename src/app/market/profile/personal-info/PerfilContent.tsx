@@ -1,5 +1,7 @@
 "use client";
 
+import { toast } from "sonner";
+
 import { FullUserData, getUserData } from "@/actions/user";
 import ChangePhotoModal from "@/components/profile/ChangePhotoModal";
 import { Button } from "@/components/ui/button";
@@ -191,15 +193,18 @@ export default function PerfilContent({ user, userId }: UserProps) {
 				const newUrl = data?.img || data?.profilePhotoUrl || data?.url;
 				if (newUrl) {
 					setCurrentPhoto(newUrl);
+					toast.success("Foto de perfil atualizada!");
 					// atualizar a navbar em tempo real
 					if (storeUser) {
 						setUser({ ...storeUser, img: newUrl });
 					}
 				}
 			} else {
-				// Se falhou, reverter para a foto anterior
-				// mantém a imagem anterior caso falhe
-				// erro já tratado visualmente
+				toast.error(result.error || "Erro ao atualizar foto.");
+				// Se falhou, reverter para a foto anterior (do store ou initial)
+				if (storeUser?.img) {
+					setCurrentPhoto(storeUser.img);
+				}
 			}
 		} finally {
 			setIsUploadingPhoto(false);
