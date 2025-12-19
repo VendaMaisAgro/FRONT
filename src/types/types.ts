@@ -306,7 +306,7 @@ export type ProductFromSeller = Pick<
 	Product,
 	'id' | 'name' | 'category' | 'variety' | 'images_Path'
 > & {
-	sellingUnitsProduct: SellingUnitProduct[];
+	sellingUnitProduct: SellingUnitProduct[];
 };
 
 export type SellerHeaderData = {

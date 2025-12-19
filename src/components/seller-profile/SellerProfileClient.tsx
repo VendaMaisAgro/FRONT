@@ -66,9 +66,9 @@ export default function SellerProfileClient({ sellerId }: SellerProfileClientPro
         const formatted = products.map((product) => ({
             ...product,
             id: product.id.toString(),
-            sellingUnitProduct: product.sellingUnitsProduct.map((u) => ({
-                    minPrice: u.minPrice,
-                    unit: u.unit
+            sellingUnitProduct: (product.sellingUnitProduct || []).map((u) => ({
+                minPrice: u.minPrice,
+                unit: u.unit
             }))
         }))
 
