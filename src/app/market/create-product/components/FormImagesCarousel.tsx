@@ -89,10 +89,9 @@ export default function FormImagesCarousel({
 									className="basis-1/5 min-[520px]:basis-1/4 min-[520px]:pt-5"
 								>
 									<li
-										className={`relative size-12 mx-auto list-none ${
-											selectedImageIndex === ind &&
+										className={`relative size-12 mx-auto list-none ${selectedImageIndex === ind &&
 											'ring-2 rounded-md ring-primary transition-all duration-300'
-										}`}
+											}`}
 									>
 										<button
 											onClick={() => setSelectedImageIndex(ind)}
@@ -130,17 +129,15 @@ export default function FormImagesCarousel({
 						/>
 					) : (
 						<div
-							className={`flex flex-col items-center justify-center w-full h-full rounded-md ${
-								validationErrors.state
+							className={`flex flex-col items-center justify-center w-full h-full rounded-md ${validationErrors.state
 									? 'bg-red-200 border border-red-400'
 									: 'bg-zinc-200'
-							}`}
+								}`}
 						>
 							<Camera
 								size={96}
-								className={`${
-									validationErrors.state ? 'text-red-400' : 'text-zinc-400'
-								}`}
+								className={`${validationErrors.state ? 'text-red-400' : 'text-zinc-400'
+									}`}
 							/>
 
 							{validationErrors.state ? (
@@ -183,7 +180,7 @@ export default function FormImagesCarousel({
 					className="hidden"
 					accept="image/png, image/jpeg, image/webp"
 					capture="environment"
-					// onChange={handleAddNewImages}
+					onChange={addImagesToForm}
 				/>
 
 				{/* Botão com AlertDialog */}

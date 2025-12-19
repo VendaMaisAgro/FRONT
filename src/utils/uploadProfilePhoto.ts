@@ -1,8 +1,11 @@
 'use client'
 
+import { compressImage } from './compressImage';
+
 export async function uploadProfilePhoto(file: File) {
+  const compressedFile = await compressImage(file, 800, 800, 0.8); // Resize to max 800x800 for profile photos
   const formData = new FormData()
-  formData.append('img', file)
+  formData.append('img', compressedFile)
 
   try {
     const res = await fetch('/api/user/profile-photo', {
