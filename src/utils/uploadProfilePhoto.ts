@@ -12,7 +12,7 @@ export async function uploadProfilePhoto(file: File) {
 
     if (!res.ok) {
       if (res.status === 413) {
-        return { success: false, error: 'A imagem é muito grande. Tamanho máximo: 5MB' }
+        return { success: false, error: 'A imagem é muito grande. Tamanho máximo: 1MB' }
       }
 
       try {
