@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const apiUrl = process.env.NEXT_PUBLIC_URL;
-const api = "http://localhost:5000";
+const api = process.env.API_URL;
 
 export async function createProduct(values: CreateProductSchemaType) {
 	const cookieStore = await cookies();
@@ -147,6 +147,7 @@ export async function getAll() {
 		return [];
 	}
 	const data = await res.json()
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return data.filter((p: any) => p.sellerId !== id);
 }
 
@@ -199,12 +200,14 @@ export async function updateProduct(
 	await verifySession(token);
 
 	try {
+		// Detectar se é FormData ou objeto JSON
 		const isFormData = values instanceof FormData;
 
 		const headers: HeadersInit = {
 			Cookie: `session=${token}`,
 		};
 
+		// Só adicionar Content-Type para JSON (FormData define automaticamente)
 		if (!isFormData) {
 			headers["Content-Type"] = "application/json";
 		}
