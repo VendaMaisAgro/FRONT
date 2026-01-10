@@ -99,7 +99,6 @@ export async function removeProductAction(id: string): Promise<boolean> {
 	const { jwt } = await verifySession(token);
 
 	try {
-		// Remove as unidades de venda associadas antes de remover o produto
 		const deleteUnitsRes = await fetch(`${api}/selling-units-product/product/${id}`, {
 			method: "DELETE",
 			headers: {
@@ -109,8 +108,6 @@ export async function removeProductAction(id: string): Promise<boolean> {
 
 		if (!deleteUnitsRes.ok && deleteUnitsRes.status !== 404) {
 			console.error("Erro ao remover unidades de venda:", deleteUnitsRes.statusText);
-			// Não retornamos false aqui para tentar excluir o produto mesmo assim,
-			// caso o erro seja algo não impeditivo ou de sincronia.
 		}
 
 		const res = await fetch(`${apiUrl}/api/sellerProducts/${id}`, {
@@ -150,7 +147,6 @@ export async function getAll() {
 		return [];
 	}
 	const data = await res.json()
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return data.filter((p: any) => p.sellerId !== id);
 }
 
@@ -203,14 +199,12 @@ export async function updateProduct(
 	await verifySession(token);
 
 	try {
-		// Detectar se é FormData ou objeto JSON
 		const isFormData = values instanceof FormData;
 
 		const headers: HeadersInit = {
 			Cookie: `session=${token}`,
 		};
 
-		// Só adicionar Content-Type para JSON (FormData define automaticamente)
 		if (!isFormData) {
 			headers["Content-Type"] = "application/json";
 		}
