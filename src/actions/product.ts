@@ -96,7 +96,23 @@ export async function removeProductAction(id: string): Promise<boolean> {
 		redirect("/login");
 	}
 
+	const { jwt } = await verifySession(token);
+
 	try {
+		// Remove as unidades de venda associadas antes de remover o produto
+		const deleteUnitsRes = await fetch(`${api}/selling-units-product/product/${id}`, {
+			method: "DELETE",
+			headers: {
+				Authorization: `Bearer ${jwt}`,
+			},
+		});
+
+		if (!deleteUnitsRes.ok && deleteUnitsRes.status !== 404) {
+			console.error("Erro ao remover unidades de venda:", deleteUnitsRes.statusText);
+			// Não retornamos false aqui para tentar excluir o produto mesmo assim,
+			// caso o erro seja algo não impeditivo ou de sincronia.
+		}
+
 		const res = await fetch(`${apiUrl}/api/sellerProducts/${id}`, {
 			method: "DELETE",
 			headers: {
