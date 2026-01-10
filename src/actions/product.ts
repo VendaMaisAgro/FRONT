@@ -11,84 +11,7 @@ import { redirect } from "next/navigation";
 const apiUrl = process.env.NEXT_PUBLIC_URL;
 const api = process.env.API_URL;
 
-export async function createProduct(values: CreateProductSchemaType) {
-	const cookieStore = await cookies();
-	const token = cookieStore.get("session")?.value;
-	const { id } = await verifySession(token);
-
-	const formData = mapProductDataToFormData(values);
-	formData.append("sellerId", id.toString());
-
-	try {
-		const res = await fetch(`${apiUrl}/api/sellerProducts`, {
-			method: "POST",
-			headers: { Cookie: `session=${token}` },
-			body: formData,
-		});
-
-		if (res.ok) {
-			return { status: res.status };
-		}
-		return {
-			status: res.status,
-		};
-	} catch (err) {
-		console.error("Erro no fetch", err);
-		return {
-			error: err,
-		};
-	}
-}
-
-export async function readProductById(id: string) {
-	const cookieStore = await cookies();
-	const session = cookieStore.get("session")?.value;
-	await verifySession(session);
-
-	const res = await fetch(`${apiUrl}/api/sellerProducts/${id}`, {
-		method: "GET",
-		headers: {
-			Cookie: `session=${session}`,
-		},
-	});
-
-	if (!res.ok) {
-		console.error(`Erro ao buscar produto ${id}: ${res.statusText}`);
-		return null;
-	}
-
-	return await res.json();
-}
-
-//TODO: melhorar tratamento de erros
-export async function suggestPrice(productName: string) {
-	if (!productName) {
-		return { success: false, message: "O nome do produto é obrigatório" };
-	}
-
-	const url = `${api}/price-recommendations/${encodeURIComponent(productName)}`;
-
-	const res = await fetch(url, {
-		method: "GET",
-		cache: "no-store",
-	});
-
-	if (!res.ok) {
-		console.error(res);
-		return {
-			success: false,
-			message: "Não foi possível buscar os dados do produto.",
-		};
-	}
-
-	const { data } = await res.json();
-	return {
-		success: true,
-		message: "Dados recuperados com sucesso.",
-		data: data,
-	};
-}
-export async function removeProductAction(id: string): Promise<boolean> {
+export async function removeProductAction(id: string): Promise<{ success: boolean; message?: string }> {
 	const cookieStore = await cookies();
 	const token = cookieStore.get("session")?.value;
 
@@ -99,6 +22,7 @@ export async function removeProductAction(id: string): Promise<boolean> {
 	const { jwt } = await verifySession(token);
 
 	try {
+		// Remove as unidades de venda associadas antes de remover o produto
 		const deleteUnitsRes = await fetch(`${api}/selling-units-product/product/${id}`, {
 			method: "DELETE",
 			headers: {
@@ -108,6 +32,8 @@ export async function removeProductAction(id: string): Promise<boolean> {
 
 		if (!deleteUnitsRes.ok && deleteUnitsRes.status !== 404) {
 			console.error("Erro ao remover unidades de venda:", deleteUnitsRes.statusText);
+			const errorText = await deleteUnitsRes.text();
+			return { success: false, message: `Erro ao remover unidades: ${deleteUnitsRes.statusText} - ${errorText}` };
 		}
 
 		const res = await fetch(`${apiUrl}/api/sellerProducts/${id}`, {
@@ -119,15 +45,16 @@ export async function removeProductAction(id: string): Promise<boolean> {
 
 		if (!res.ok) {
 			console.error("Failed to delete product:", res.statusText);
-			return false;
+			const errorText = await res.text();
+			return { success: false, message: `Erro ao remover produto: ${res.statusText} - ${errorText}` };
 		}
 
 		revalidatePath("/market/myproducts");
 
-		return true;
+		return { success: true };
 	} catch (error) {
 		console.error("Error in removeProductAction:", error);
-		return false;
+		return { success: false, message: `Erro interno: ${error}` };
 	}
 }
 

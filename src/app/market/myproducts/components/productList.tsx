@@ -23,9 +23,9 @@ export default function ProductListClient({
 
 	async function handleRemoveProductClient(id: string) {
 		try {
-			const success = await removeProductAction(id);
-			if (!success) {
-				toast.error('Erro ao remover produto, por favor tente novamente.');
+			const result = await removeProductAction(id);
+			if (!result.success) {
+				toast.error(result.message || 'Erro ao remover produto, por favor tente novamente.');
 				return;
 			}
 			setProducts(products.filter((p) => p.id !== id));
