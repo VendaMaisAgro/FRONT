@@ -60,7 +60,6 @@ export async function readProductById(id: string) {
 	return await res.json();
 }
 
-//TODO: melhorar tratamento de erros
 export async function suggestPrice(productName: string) {
 	if (!productName) {
 		return { success: false, message: "O nome do produto é obrigatório" };
@@ -100,7 +99,6 @@ export async function removeProductAction(id: string): Promise<{ success: boolea
 	const { jwt } = await verifySession(token);
 
 	try {
-		// Remove as unidades de venda associadas antes de remover o produto
 		const deleteUnitsRes = await fetch(`${api}/selling-units-product/product/${id}`, {
 			method: "DELETE",
 			headers: {
@@ -152,7 +150,6 @@ export async function getAll() {
 		return [];
 	}
 	const data = await res.json()
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
 	return data.filter((p: any) => p.sellerId !== id);
 }
 
@@ -205,14 +202,12 @@ export async function updateProduct(
 	await verifySession(token);
 
 	try {
-		// Detectar se é FormData ou objeto JSON
 		const isFormData = values instanceof FormData;
 
 		const headers: HeadersInit = {
 			Cookie: `session=${token}`,
 		};
 
-		// Só adicionar Content-Type para JSON (FormData define automaticamente)
 		if (!isFormData) {
 			headers["Content-Type"] = "application/json";
 		}
