@@ -342,3 +342,46 @@ export type SellingUnit = {
 // 	images: string[];
 // 	;
 // };
+
+export type PixPaymentParams = {
+	saleId: string;
+	paymentMethodId: string;
+	amount: number;
+	email: string;
+	expirationMinutes?: number;
+};
+
+export type PixPaymentResponse = {
+	paymentId: string;
+	orderId: string;
+	orderStatus: string;
+	payment: {
+		id: string;
+		status: string;
+		status_detail: string;
+		qr_code: string;
+		qr_code_base64: string;
+		ticket_url: string;
+	};
+};
+
+export type PaymentSyncResponse = {
+	success: boolean;
+	updated?: boolean;
+	message?: string;
+	payment?: {
+		id: string;
+		status: string;
+		mp_payment_id: string;
+		mp_status: string;
+		mp_status_detail: string;
+	};
+	mercadopago?: {
+		id: number;
+		status: string;
+		status_detail: string;
+		transaction_amount: number;
+		date_approved: string;
+		date_created: string;
+	};
+};
