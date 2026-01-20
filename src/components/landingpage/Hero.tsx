@@ -12,7 +12,7 @@ const Hero = () => {
 				alt="Hero image"
 				width={500}
 				height={500}
-				className="absolute z-20 left-1/2 -translate-x-1/2 top-1/2 -translate-y-1/2 invisible sm:visible"
+				className="absolute z-20 left-1/2 -translate-x-1/2 top-[35%] -translate-y-1/2 invisible sm:visible"
 			/>
 
 			<Image
