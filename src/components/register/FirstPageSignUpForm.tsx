@@ -23,8 +23,12 @@ import DocumentsDialog from './DocumentsDialog';
 
 export function FirstPageSignUpForm({
 	form,
+	onUserTypeChange,
 }: {
 	form: UseFormReturn<SignUpFormValues>;
+	onUserTypeChange: (
+		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
+	) => void;
 }) {
 	const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
 	const [documentModalContentType, setDocumentModalContentType] = useState<
@@ -36,6 +40,7 @@ export function FirstPageSignUpForm({
 		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
 	) {
 		form.setValue('userType', type);
+		onUserTypeChange(type);
 		//! Aguardando a possibilidade de cadastro como produtor individual
 		// form.clearErrors(['cpf', 'cnpj']);
 		// form.resetField('cpf');
@@ -71,7 +76,7 @@ export function FirstPageSignUpForm({
 							</FormControl>
 
 							<SelectContent>
-								<SelectItem value="distributor">Distribuidor</SelectItem>
+								<SelectItem value="distributor">Sou Comprador/ Distribuidor</SelectItem>
 								<SelectItem value="cooperative-or-partnership">
 									Cooperativa/Associação
 								</SelectItem>
@@ -140,57 +145,57 @@ export function FirstPageSignUpForm({
 			{(userType === 'cooperative-or-partnership' ||
 				userType === 'distributor' ||
 				userType === 'farmer') && (
-				<>
-					<FormField
-						control={form.control}
-						name="cnpj"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel htmlFor="cnpj">
-									CNPJ <span className="text-red-500">*</span>
-								</FormLabel>
+					<>
+						<FormField
+							control={form.control}
+							name="cnpj"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel htmlFor="cnpj">
+										CNPJ <span className="text-red-500">*</span>
+									</FormLabel>
 
-								<FormControl>
-									<Input
-										id="cnpj"
-										placeholder="00.000.000/0000-00"
-										{...field}
-										value={formatCnpj(field.value)}
-										onChange={(e) => {
-											const val = e.target.value.replace(/\D/g, '');
-											field.onChange(val);
-										}}
-										className="w-full border border-border rounded h-12 px-4 py-3"
-									/>
-								</FormControl>
+									<FormControl>
+										<Input
+											id="cnpj"
+											placeholder="00.000.000/0000-00"
+											{...field}
+											value={formatCnpj(field.value)}
+											onChange={(e) => {
+												const val = e.target.value.replace(/\D/g, '');
+												field.onChange(val);
+											}}
+											className="w-full border border-border rounded h-12 px-4 py-3"
+										/>
+									</FormControl>
 
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
 
-					<FormField
-						control={form.control}
-						name="ccir"
-						render={({ field }) => (
-							<FormItem>
-								<FormLabel htmlFor="ccir">CCIR</FormLabel>
+						<FormField
+							control={form.control}
+							name="ccir"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel htmlFor="ccir">CCIR</FormLabel>
 
-								<FormControl>
-									<Input
-										id="ccir"
-										placeholder="Digite seu CCIR"
-										className="w-full border border-border rounded h-12 px-4 py-3"
-										{...field}
-									/>
-								</FormControl>
+									<FormControl>
+										<Input
+											id="ccir"
+											placeholder="Digite seu CCIR"
+											className="w-full border border-border rounded h-12 px-4 py-3"
+											{...field}
+										/>
+									</FormControl>
 
-								<FormMessage />
-							</FormItem>
-						)}
-					/>
-				</>
-			)}
+									<FormMessage />
+								</FormItem>
+							)}
+						/>
+					</>
+				)}
 
 			<FormField
 				control={form.control}

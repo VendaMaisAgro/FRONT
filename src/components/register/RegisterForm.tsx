@@ -18,9 +18,15 @@ import { SecondPageSignUpForm } from './SecondPageSignUpForm';
 
 type RegisterFormProps = {
 	registerAs: 'distributor' | 'cooperative-or-partnership' | 'farmer';
+	onUserTypeChange: (
+		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
+	) => void;
 };
 
-export default function RegisterForm({ registerAs }: RegisterFormProps) {
+export default function RegisterForm({
+	registerAs,
+	onUserTypeChange,
+}: RegisterFormProps) {
 	const [formPosition, setFormPosition] = useState<number>(0);
 	const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -127,7 +133,12 @@ export default function RegisterForm({ registerAs }: RegisterFormProps) {
 
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-					{formPosition === 0 && <FirstPageSignUpForm form={form} />}
+					{formPosition === 0 && (
+						<FirstPageSignUpForm
+							form={form}
+							onUserTypeChange={onUserTypeChange}
+						/>
+					)}
 
 					{formPosition === 1 && <SecondPageSignUpForm form={form} />}
 

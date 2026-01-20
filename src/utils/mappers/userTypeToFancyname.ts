@@ -1,7 +1,7 @@
 const userTypeToFancyName = [
 	{
 		type: 'distributor',
-		fancyName: 'Distribuidor',
+		fancyName: 'Comprador/Distribuidor',
 	},
 	{
 		type: 'cooperative-or-partnership',
