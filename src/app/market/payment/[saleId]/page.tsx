@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import { currencyFormatter } from '@/utils/functions'
 import { CreditCard, Loader2, AlertCircle } from 'lucide-react'
-import type { SaleData, PixPaymentResponse } from '@/types/types'
+import type { SaleData, PixPaymentResponse, BoletoPaymentResponse } from '@/types/types'
 import { isValidUUID, sanitizeString, isValidPaymentUrl, validatePaymentData } from '@/lib/validation'
 import PixPayment from '@/components/payment/PixPayment'
+import BoletoPayment from '@/components/payment/BoletoPayment'
 
 export default function PaymentPage() {
     const params = useParams()
@@ -20,6 +21,7 @@ export default function PaymentPage() {
     const [processing, setProcessing] = useState(false)
     const [error, setError] = useState<string | null>(null)
     const [pixData, setPixData] = useState<PixPaymentResponse | null>(null)
+    const [boletoData, setBoletoData] = useState<BoletoPaymentResponse | null>(null)
 
     useEffect(() => {
         if (!saleId) {
@@ -130,10 +132,22 @@ export default function PaymentPage() {
             // Preparar dados do pagamento
             const paymentMethodId = sale.paymentMethodId
 
-            // Melhorar detecção de PIX: verificar ID e também o nome do método se disponível
+            // Melhorar detecção de PIX e Boleto
             const methodName = sale.paymentMethod?.method || ''
+
+            console.log('DEBUG PAYMENT:', {
+                paymentMethodId,
+                methodName,
+                salePaymentMethod: sale.paymentMethod
+            })
+
             const isPix = String(paymentMethodId).toLowerCase().includes('pix') ||
                 methodName.toLowerCase().includes('pix')
+            const isBoleto = String(paymentMethodId).toLowerCase().includes('boleto') ||
+                methodName.toLowerCase().includes('boleto') ||
+                methodName.toLowerCase().includes('ticket')
+
+            console.log('DEBUG DETECT:', { isPix, isBoleto })
 
             if (!paymentMethodId) {
                 setError('Método de pagamento não encontrado no pedido')
@@ -149,7 +163,8 @@ export default function PaymentPage() {
                 unit_price: precoMedio,
                 quantity: quantidadeTotal,
                 amount: totalGeral,
-                email: sale.buyer?.email || 'email@nao-informado.com' // Necessário para PIX
+                email: sale.buyer?.email || 'email@nao-informado.com', // Necessário para PIX
+                expirationDays: 3 // Padrão para boleto
             }
 
             // Validar dados antes de enviar
@@ -163,9 +178,11 @@ export default function PaymentPage() {
             }
 
             // Decidir qual endpoint chamar
-            const endpoint = isPix ? '/api/payment/pix' : '/api/payment/preference'
+            let endpoint = '/api/payment/preference'
+            if (isPix) endpoint = '/api/payment/pix'
+            if (isBoleto) endpoint = '/api/payment/boleto'
 
-            // Criar preferência de pagamento ou pagamento PIX
+            // Criar preferência de pagamento ou pagamento PIX/Boleto
             const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {
@@ -198,6 +215,9 @@ export default function PaymentPage() {
             if (isPix) {
                 // Se for PIX, salvamos os dados para exibir o componente
                 setPixData(result as PixPaymentResponse)
+            } else if (isBoleto) {
+                // Se for Boleto, salvamos os dados para exibir o componente
+                setBoletoData(result as BoletoPaymentResponse)
             } else {
                 // Se for preferência (cartão, etc), redirecionamos
                 if (result.init_point) {
@@ -322,6 +342,22 @@ export default function PaymentPage() {
                         paymentData={pixData}
                         onSuccess={() => {
                             // Atualizar estado local se necessário ou recarregar
+                            setSale(prev => prev ? { ...prev, paymentCompleted: true } : null)
+                        }}
+                    />
+                </div>
+            </div>
+        )
+    }
+
+    // Se já temos dados do Boleto, mostramos o componente de pagamento Boleto
+    if (boletoData) {
+        return (
+            <div className="py-8 px-4">
+                <div className="max-w-md mx-auto space-y-6">
+                    <BoletoPayment
+                        paymentData={boletoData}
+                        onSuccess={() => {
                             setSale(prev => prev ? { ...prev, paymentCompleted: true } : null)
                         }}
                     />

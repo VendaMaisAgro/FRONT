@@ -23,9 +23,8 @@ const paymentMethods = [
 	},
 	{
 		method: 'boleto',
-		icon: <Barcode size={16} className="text-neutral-300" />,
+		icon: <Barcode size={16} className="text-black" />,
 		description: 'Aprovação em até 3 dias úteis.',
-		wip: true,
 	},
 ];
 
