@@ -408,3 +408,24 @@ export type BoletoPaymentResponse = {
 		expiration_date: string;
 	};
 };
+
+export type CardPaymentParams = {
+	saleId: string;
+	paymentMethodId: string;
+	amount: number;
+	token: string;
+	installments: number;
+	paymentMethodType: string;
+	cardPaymentMethodId: string;
+};
+
+export type CardPaymentResponse = {
+	paymentId: string;
+	orderId: string;
+	orderStatus: string;
+	payment: {
+		id: string;
+		status: string;
+		status_detail: string;
+	};
+};

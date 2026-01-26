@@ -19,7 +19,6 @@ const paymentMethods = [
 		method: 'cartão',
 		icon: <CreditCard size={16} className="text-neutral-300" />,
 		description: 'Parcelamento em até 24x.',
-		wip: true,
 	},
 	{
 		method: 'boleto',
