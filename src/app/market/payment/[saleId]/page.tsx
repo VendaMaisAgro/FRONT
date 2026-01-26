@@ -11,6 +11,7 @@ import type { SaleData, PixPaymentResponse, BoletoPaymentResponse } from '@/type
 import { isValidUUID, sanitizeString, isValidPaymentUrl, validatePaymentData } from '@/lib/validation'
 import PixPayment from '@/components/payment/PixPayment'
 import BoletoPayment from '@/components/payment/BoletoPayment'
+import CardPayment from '@/components/payment/CardPayment'
 
 export default function PaymentPage() {
     const params = useParams()
@@ -22,6 +23,7 @@ export default function PaymentPage() {
     const [error, setError] = useState<string | null>(null)
     const [pixData, setPixData] = useState<PixPaymentResponse | null>(null)
     const [boletoData, setBoletoData] = useState<BoletoPaymentResponse | null>(null)
+    const [showCardForm, setShowCardForm] = useState(false)
 
     useEffect(() => {
         if (!saleId) {
@@ -135,19 +137,26 @@ export default function PaymentPage() {
             // Melhorar detecção de PIX e Boleto
             const methodName = sale.paymentMethod?.method || ''
 
-            console.log('DEBUG PAYMENT:', {
-                paymentMethodId,
-                methodName,
-                salePaymentMethod: sale.paymentMethod
-            })
+            const isPix = (String(paymentMethodId).toLowerCase().includes('pix') ||
+                methodName.toLowerCase().includes('pix')) &&
+                !methodName.toLowerCase().includes('boleto') // Garantir que não é boleto
 
-            const isPix = String(paymentMethodId).toLowerCase().includes('pix') ||
-                methodName.toLowerCase().includes('pix')
             const isBoleto = String(paymentMethodId).toLowerCase().includes('boleto') ||
                 methodName.toLowerCase().includes('boleto') ||
                 methodName.toLowerCase().includes('ticket')
 
-            console.log('DEBUG DETECT:', { isPix, isBoleto })
+            const isCard = String(paymentMethodId).toLowerCase().includes('card') ||
+                methodName.toLowerCase().includes('cartão') ||
+                methodName.toLowerCase().includes('credit')
+
+            // Se for cartão, ativamos o formulário e paramos por aqui
+            if (isCard) {
+                setShowCardForm(true)
+                setProcessing(false)
+                return;
+            }
+
+            console.log('DEBUG DETECT:', { isPix, isBoleto, isCard })
 
             if (!paymentMethodId) {
                 setError('Método de pagamento não encontrado no pedido')
@@ -236,6 +245,9 @@ export default function PaymentPage() {
             console.error('Erro ao processar pagamento:', err)
             setError(err instanceof Error ? err.message : 'Erro ao processar pagamento')
         } finally {
+            // Only stop processing if not card (card stops manually above)
+            // But wait, if we are here, we either finished pix/boleto or errored.
+            // If card, we returned early. So safe to set false.
             setProcessing(false)
         }
     }
@@ -333,6 +345,18 @@ export default function PaymentPage() {
         return null
     }
 
+    // Calcular totais
+    // bp.value já é o valor total (preço unitário * quantidade)
+    const totalProdutos = sale.boughtProducts.reduce(
+        (acc, bp) => acc + Number(bp.value),
+        0
+    )
+    const totalFrete = Number(sale.transportValue || 0)
+    const totalGeral = totalProdutos + totalFrete
+
+    const vendorName =
+        sale.boughtProducts[0]?.product?.seller?.name || 'Vendedor desconhecido'
+
     // Se já temos dados do PIX, mostramos o componente de pagamento PIX
     if (pixData) {
         return (
@@ -366,17 +390,35 @@ export default function PaymentPage() {
         )
     }
 
-    // Calcular totais
-    // bp.value já é o valor total (preço unitário * quantidade)
-    const totalProdutos = sale.boughtProducts.reduce(
-        (acc, bp) => acc + Number(bp.value),
-        0
-    )
-    const totalFrete = Number(sale.transportValue || 0)
-    const totalGeral = totalProdutos + totalFrete
+    // Se for cartão de crédito E o usuário clicou em finalizar, mostramos o componente de cartão
+    const isCardMethod = sale.paymentMethod?.method?.toLowerCase().includes('cartão') ||
+        sale.paymentMethod?.method?.toLowerCase().includes('credit') ||
+        String(sale.paymentMethodId).toLowerCase().includes('card');
 
-    const vendorName =
-        sale.boughtProducts[0]?.product?.seller?.name || 'Vendedor desconhecido'
+    if (isCardMethod && !sale.paymentCompleted && showCardForm) {
+        return (
+            <div className="py-8 px-4">
+                <div className="max-w-md mx-auto space-y-6">
+                    <Button
+                        variant="ghost"
+                        onClick={() => setShowCardForm(false)}
+                        className="mb-4"
+                    >
+                        ← Voltar para resumo
+                    </Button>
+                    <CardPayment
+                        saleId={sale.id}
+                        paymentMethodId={sale.paymentMethodId}
+                        amount={totalGeral}
+                        email={sale.buyer?.email || ''}
+                        onSuccess={() => {
+                            setSale(prev => prev ? { ...prev, paymentCompleted: true } : null)
+                        }}
+                    />
+                </div>
+            </div>
+        )
+    }
 
     return (
         <div className="py-8 px-4">
@@ -528,4 +570,3 @@ export default function PaymentPage() {
         </div>
     )
 }
-
