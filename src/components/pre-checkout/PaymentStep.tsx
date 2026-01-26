@@ -11,6 +11,7 @@ import {
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Label } from '@/components/ui/label';
 import useFetchPaymentMethods from '@/hooks/useFetchPaymentMethods';
+import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { PaymentMethodsData } from '@/types/types';
 import {
 	getDescription,
@@ -72,16 +73,25 @@ export default function PaymentStep() {
 													(method: PaymentMethodsData, i: number) => {
 														const methodIdentifier =
 															method.method.toLowerCase();
-														const wipMethod = isWip(methodIdentifier);
+														let wipMethod = isWip(methodIdentifier);
+
+														// Validação de valor mínimo para Boleto
+														const { orderValue } = useCheckoutStore.getState();
+														const totalValue = orderValue();
+														const isBoleto = methodIdentifier.includes('boleto');
+														const minBoletoValue = 4.00;
+
+														if (isBoleto && totalValue < minBoletoValue) {
+															wipMethod = true; // Desabilita se valor for menor que o mínimo
+														}
 
 														return (
 															<div
 																key={i}
-																className={`flex items-center space-x-3 p-4 border rounded-lg ${
-																	wipMethod
-																		? 'cursor-not-allowed'
-																		: 'hover:bg-gray-50'
-																}`}
+																className={`flex items-center space-x-3 p-4 border rounded-lg ${wipMethod
+																	? 'cursor-not-allowed opacity-60'
+																	: 'hover:bg-gray-50'
+																	}`}
 															>
 																<RadioGroupItem
 																	disabled={wipMethod}
@@ -93,22 +103,22 @@ export default function PaymentStep() {
 																	<div>
 																		<Label
 																			htmlFor="pix"
-																			className={`${
-																				wipMethod && 'text-neutral-500'
-																			} 'font-medium'`}
+																			className={`${wipMethod && 'text-neutral-500'
+																				} 'font-medium'`}
 																		>
 																			{method.method}
 																		</Label>
 
 																		<p
-																			className={`text-sm ${
-																				wipMethod
-																					? 'text-neutral-400'
-																					: 'text-green-600'
-																			}`}
+																			className={`text-sm ${wipMethod
+																				? 'text-neutral-400'
+																				: 'text-green-600'
+																				}`}
 																		>
 																			{wipMethod
-																				? 'Em desenvolvimento...'
+																				? isBoleto && totalValue < minBoletoValue
+																					? `Mínimo de R$ ${minBoletoValue.toFixed(2).replace('.', ',')} para Boleto`
+																					: 'Em desenvolvimento...'
 																				: getDescription(methodIdentifier)}
 																		</p>
 																	</div>

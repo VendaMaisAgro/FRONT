@@ -385,3 +385,26 @@ export type PaymentSyncResponse = {
 		date_created: string;
 	};
 };
+
+export type BoletoPaymentParams = {
+	saleId: string;
+	paymentMethodId: string;
+	amount: number;
+	expirationDays?: number;
+};
+
+export type BoletoPaymentResponse = {
+	paymentId: string;
+	orderId: string;
+	orderStatus: string;
+	payment: {
+		id: string;
+		status: string;
+		status_detail: string;
+		ticket_url: string;
+		barcode_content: string;
+		digitable_line: string;
+		financial_institution: string;
+		expiration_date: string;
+	};
+};
