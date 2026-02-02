@@ -39,9 +39,9 @@ const productImagesSchema =
 	typeof window === 'undefined'
 		? z.any()
 		: z.union([
-				z.instanceof(File, { message: 'Por favor insira uma imagem.' }),
-				z.string().min(1, 'URL da imagem é obrigatória'),
-		  ]);
+			z.instanceof(File, { message: 'Por favor insira uma imagem.' }),
+			z.string().min(1, 'URL da imagem é obrigatória'),
+		]);
 
 export const createProductSchema = z.object({
 	name: z.string().min(1, 'Por favor preencha o nome do seu produto.'),
@@ -175,20 +175,29 @@ const signUpCommonSchema = z.object({
 });
 
 const enterprisesSchema = signUpCommonSchema.extend({
-	userType: z.enum(['distributor', 'cooperative-or-partnership', 'farmer'], {
-		errorMap: (issue) => {
-			switch (issue.code) {
-				case 'invalid_enum_value':
-					return { message: 'Por favor, selecione um tipo de usuário válido.' };
-				case 'invalid_union_discriminator':
-					return { message: 'O tipo de usuário é obrigatório.' };
-				default:
-					return {
-						message: 'Ocorreu um erro na validação do tipo de usuário.',
-					};
-			}
-		},
-	}),
+	userType: z.enum(
+		[
+			'distributor',
+			'cooperative-or-partnership',
+			'farmer',
+			'wholesaler',
+			'supermarket',
+		],
+		{
+			errorMap: (issue) => {
+				switch (issue.code) {
+					case 'invalid_enum_value':
+						return { message: 'Por favor, selecione um tipo de usuário válido.' };
+					case 'invalid_union_discriminator':
+						return { message: 'O tipo de usuário é obrigatório.' };
+					default:
+						return {
+							message: 'Ocorreu um erro na validação do tipo de usuário.',
+						};
+				}
+			},
+		}
+	),
 	cnpj: z.string().min(14, 'O CNPJ deve ter exatamente 14 dígitos.'),
 	ccir: z.string().optional(),
 });

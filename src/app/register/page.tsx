@@ -9,8 +9,13 @@ export default function RegisterPage() {
 	const searchParams = useSearchParams();
 	const asParam = searchParams.get('as');
 
-	let registerAs: 'distributor' | 'cooperative-or-partnership' | 'farmer' =
-		'distributor';
+	let registerAs:
+		| 'distributor'
+		| 'cooperative-or-partnership'
+		| 'farmer'
+		| 'wholesaler'
+		| 'supermarket'
+		| undefined = undefined;
 
 	if (asParam === 'Comprador/Distribuidor') {
 		registerAs = 'distributor';
@@ -23,27 +28,38 @@ export default function RegisterPage() {
 	}
 
 	const [selectedUserType, setSelectedUserType] = useState<
-		'distributor' | 'cooperative-or-partnership' | 'farmer'
+		| 'distributor'
+		| 'cooperative-or-partnership'
+		| 'farmer'
+		| 'wholesaler'
+		| 'supermarket'
+		| undefined
 	>(registerAs);
 
 	const userTypeImages = {
 		distributor: '/Buyer-Distributor.JPG',
 		'cooperative-or-partnership': '/Cooperative-Association.JPG',
 		farmer: '/Rural Producer.JPG',
+		wholesaler: '/Buyer-Distributor.JPG',
+		supermarket: '/Buyer-Distributor.JPG',
 	};
 
 	return (
 		<div className="bg-background min-h-screen flex flex-col md:flex-row">
 			<div className="w-full md:w-[40%] px-8 md:px-20 pt-20 pb-10 flex flex-col relative">
 				<RegisterForm
-					registerAs={registerAs ?? 'distributor'}
+					registerAs={registerAs}
 					onUserTypeChange={setSelectedUserType}
 				/>
 			</div>
 
 			<div className="hidden md:flex w-[60%] relative">
 				<Image
-					src={userTypeImages[selectedUserType]}
+					src={
+						selectedUserType
+							? userTypeImages[selectedUserType]
+							: '/imagemAgricultor.jpg'
+					}
 					alt="Imagem agrícola"
 					fill
 					className="object-cover"
