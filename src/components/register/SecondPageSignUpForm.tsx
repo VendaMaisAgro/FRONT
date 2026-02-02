@@ -22,7 +22,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="firstSecurityQuestion">
-							Pergunta 1 <span className="text-red-500">*</span>
+							3 primeiros dígitos do CNPJ. <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>
@@ -45,7 +45,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="secondSecurityQuestion">
-							Pergunta 2 <span className="text-red-500">*</span>
+							Qual cidade sede da sua empresa. <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>
@@ -68,7 +68,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="thirdSecurityQuestion">
-							Pergunta 3 <span className="text-red-500">*</span>
+							Ano de abertura da sua empresa (aaaa). <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>
