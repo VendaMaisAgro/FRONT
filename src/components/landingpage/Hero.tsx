@@ -35,21 +35,15 @@ const Hero = () => {
 				<div className="space-y-3">
 					<h4 className="text-lg font-medium">Cadastre-se</h4>
 					<div className="flex flex-col gap-3 md:flex-row">
-						<Link href="/register?as=Comprador/Distribuidor" className="flex-1">
-							<button className="cursor-pointer bg-amber-800 hover:bg-amber-700 text-white px-2 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full h-full">
-								Sou Comprador/ Distribuidor
+						<Link href="/register" className="flex-1">
+							<button className="cursor-pointer bg-amber-800 hover:bg-amber-700 text-white px-2 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full h-full whitespace-nowrap">
+								Quero Comprar
 							</button>
 						</Link>
 
-						<Link href="/register?as=cooperative-or-partnership" className="flex-1">
-							<button className="cursor-pointer bg-amber-900 hover:bg-amber-700 text-white px-2 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full h-full">
-								Sou Cooperativa/Associação
-							</button>
-						</Link>
-
-						<Link href="/register?as=farmer" className="flex-1">
-							<button className="cursor-pointer bg-amber-950 hover:bg-amber-700 text-white px-2 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full h-full">
-								Produtor Rural
+						<Link href="/register" className="flex-1">
+							<button className="cursor-pointer bg-amber-950 hover:bg-amber-700 text-white px-2 py-4 rounded-lg text-lg font-semibold transition-all duration-300 transform hover:scale-105 shadow-lg w-full h-full whitespace-nowrap">
+								Quero Vender
 							</button>
 						</Link>
 					</div>

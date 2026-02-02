@@ -27,7 +27,12 @@ export function FirstPageSignUpForm({
 }: {
 	form: UseFormReturn<SignUpFormValues>;
 	onUserTypeChange: (
-		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
+		type:
+			| 'distributor'
+			| 'cooperative-or-partnership'
+			| 'farmer'
+			| 'wholesaler'
+			| 'supermarket'
 	) => void;
 }) {
 	const [isDocumentModalOpen, setIsDocumentModalOpen] = useState(false);
@@ -37,7 +42,12 @@ export function FirstPageSignUpForm({
 	const userType = form.watch('userType');
 
 	function handleUserTypeChange(
-		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
+		type:
+			| 'distributor'
+			| 'cooperative-or-partnership'
+			| 'farmer'
+			| 'wholesaler'
+			| 'supermarket'
 	) {
 		form.setValue('userType', type);
 		onUserTypeChange(type);
@@ -64,7 +74,12 @@ export function FirstPageSignUpForm({
 						<Select
 							onValueChange={(v) =>
 								handleUserTypeChange(
-									v as 'distributor' | 'cooperative-or-partnership' | 'farmer'
+									v as
+									| 'distributor'
+									| 'cooperative-or-partnership'
+									| 'farmer'
+									| 'wholesaler'
+									| 'supermarket'
 								)
 							}
 							defaultValue={field.value}
@@ -81,6 +96,8 @@ export function FirstPageSignUpForm({
 									Cooperativa/Associação
 								</SelectItem>
 								<SelectItem value="farmer">Produtor Rural</SelectItem>
+								<SelectItem value="wholesaler">Atacadista</SelectItem>
+								<SelectItem value="supermarket">Supermercado</SelectItem>
 							</SelectContent>
 						</Select>
 
@@ -144,7 +161,9 @@ export function FirstPageSignUpForm({
 
 			{(userType === 'cooperative-or-partnership' ||
 				userType === 'distributor' ||
-				userType === 'farmer') && (
+				userType === 'farmer' ||
+				userType === 'wholesaler' ||
+				userType === 'supermarket') && (
 					<>
 						<FormField
 							control={form.control}

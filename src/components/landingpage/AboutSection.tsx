@@ -40,7 +40,7 @@ const AboutSection = () => {
                   Na <strong className="text-primary">Venda+ Agromarket</strong>, valorizamos a produção agrícola regional e acreditamos no potencial dos pequenos e médios produtores. Nossa missão é ampliar o alcance da produção, eliminando as barreiras de comercialização e possibilitando o acesso ao mercado e combatendo as desigualdades que muitas vezes afetam quem vive do campo.
                 </p>
                 <p>
-                  Por meio da nossa plataforma, oferecemos ferramentas que permitem ao produtor divulgar seus produtos e vendê-los de forma simples, rápida e eficiente. Aqui, o produtor tem controle total sobre o processo de venda, sem depender de intermediários, garantindo mais autonomia, melhores negociações e uma conexão direta com seus clientes.
+                  Por meio da nossa plataforma, oferecemos ferramentas que permitem ao produtor divulgar seus produtos e vendê-los de forma simples, rápida e eficiente. Aqui, o produtor tem controle total sobre o processo de venda, garantindo mais autonomia, melhores negociações e uma conexão direta com seus clientes.
                 </p>
               </div>
             </div>

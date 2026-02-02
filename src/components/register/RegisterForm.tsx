@@ -17,9 +17,21 @@ import { FirstPageSignUpForm } from './FirstPageSignUpForm';
 import { SecondPageSignUpForm } from './SecondPageSignUpForm';
 
 type RegisterFormProps = {
-	registerAs: 'distributor' | 'cooperative-or-partnership' | 'farmer';
+	registerAs:
+	| 'distributor'
+	| 'cooperative-or-partnership'
+	| 'farmer'
+	| 'wholesaler'
+	| 'supermarket'
+	| undefined;
 	onUserTypeChange: (
-		type: 'distributor' | 'cooperative-or-partnership' | 'farmer'
+		type:
+			| 'distributor'
+			| 'cooperative-or-partnership'
+			| 'farmer'
+			| 'wholesaler'
+			| 'supermarket'
+			| undefined
 	) => void;
 };
 
@@ -35,7 +47,12 @@ export default function RegisterForm({
 	const form = useForm<SignUpFormValues>({
 		resolver: zodResolver(signUpSchema),
 		defaultValues: {
-			userType: registerAs,
+			userType: registerAs as
+				| 'distributor'
+				| 'cooperative-or-partnership'
+				| 'farmer'
+				| 'wholesaler'
+				| 'supermarket',
 			name: '',
 			cnpj: '',
 			ccir: '',
