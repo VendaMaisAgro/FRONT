@@ -1,7 +1,15 @@
 import { Barcode, CreditCard } from 'lucide-react';
 import Image from 'next/image';
+import React from 'react';
 
-const paymentMethods = [
+interface PaymentMethod {
+	method: string;
+	icon: React.ReactNode;
+	description: string;
+	wip?: boolean;
+}
+
+const paymentMethods: PaymentMethod[] = [
 	{
 		method: 'pix',
 		icon: (
