@@ -11,6 +11,7 @@ import {
 	HeartPlus,
 	LayoutDashboard,
 	LogOut,
+	Mail,
 	ShoppingBag,
 } from "lucide-react";
 
@@ -75,6 +76,12 @@ export const sectionsListData = [
 	{
 		group: "Plataforma",
 		sections: [
+			{
+				icon: <Mail size={20} />,
+				title: "Fale Conosco",
+				href: "/market/contact",
+				type: "default",
+			},
 			// {
 			// 	icon: <Info size={20} />,
 			// 	title: "Suporte",
