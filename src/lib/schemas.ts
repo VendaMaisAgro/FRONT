@@ -144,7 +144,7 @@ export const signInSchema = z.object({
 });
 
 const signUpCommonSchema = z.object({
-	name: z.string().min(15, 'O nome deve ter no mínimo 15 caracteres.').max(50),
+	name: z.string().min(1, 'O nome completo é obrigatório.').max(50),
 	phone_number: z.string().min(10, 'O telefone deve ter DDD + 8 ou 9 dígitos.'),
 	email: z.string().email('Insira um email válido.'),
 	password: z.string().min(8, 'Sua senha deve ter no mínimo 8 caracteres.'),
@@ -198,7 +198,12 @@ const enterprisesSchema = signUpCommonSchema.extend({
 			},
 		}
 	),
-	cnpj: z.string().min(14, 'O CNPJ deve ter exatamente 14 dígitos.'),
+	cpfCnpj: z
+		.string()
+		.min(11, 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos).')
+		.refine((val) => val.length === 11 || val.length === 14, {
+			message: 'O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).',
+		}),
 	ccir: z.string().optional(),
 });
 

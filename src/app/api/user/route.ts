@@ -119,10 +119,7 @@ export async function POST(req: NextRequest) {
 				ok: res.ok,
 				data: {
 					message:
-						// data.error ??
-						/*! Aguardar melhor tratamento de erro do backend para conseguir
-						 indicar melhor o erro no front*/
-
+						data.error ??
 						"Erro ao realizar cadastro, por favor verifique seu dados e tente novamente.",
 				},
 			},
