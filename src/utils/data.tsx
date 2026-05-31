@@ -227,8 +227,7 @@ export const signUpFormSteps = [
 		fields: [
 			"userType",
 			"name",
-			"cnpj",
-			"cpf",
+			"cpfCnpj",
 			"ccir",
 			"phone_number",
 			"email",

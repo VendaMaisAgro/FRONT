@@ -144,7 +144,9 @@ function getDocumentDescription(type: 'privacyPolicy' | 'termsOfUse') {
 }
 
 function getDocumentContent(type: 'privacyPolicy' | 'termsOfUse') {
-	return DOMPurify.sanitize(signUpDocumentData[type].content);
+	const content = signUpDocumentData[type].content;
+	if (typeof window === 'undefined') return content;
+	return DOMPurify.sanitize(content);
 }
 
 export { getDocumentTitle, getDocumentDescription, getDocumentContent };

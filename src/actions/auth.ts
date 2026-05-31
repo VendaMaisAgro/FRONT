@@ -70,8 +70,12 @@ export async function signUp(data: SignUpFormValues) {
 		firstSecurityQuestion,
 		secondSecurityQuestion,
 		thirdSecurityQuestion,
+		cpfCnpj,
 		...rest
 	} = data;
+
+	const rawDoc = cpfCnpj.replace(/\D/g, '');
+	const docField = rawDoc.length === 11 ? { cpf: rawDoc } : { cnpj: rawDoc };
 
 	let payload = {
 		securityQuestions: {
@@ -80,6 +84,7 @@ export async function signUp(data: SignUpFormValues) {
 			answer_3: thirdSecurityQuestion,
 		},
 		role: userType,
+		...docField,
 	};
 
 	if ("ccir" in rest && rest.ccir !== undefined && rest.ccir !== "") {

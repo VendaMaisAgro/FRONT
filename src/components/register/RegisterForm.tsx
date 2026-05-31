@@ -54,7 +54,7 @@ export default function RegisterForm({
 				| 'wholesaler'
 				| 'supermarket',
 			name: '',
-			cnpj: '',
+			cpfCnpj: '',
 			ccir: '',
 			phone_number: '',
 			email: '',

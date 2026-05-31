@@ -8,7 +8,7 @@ import {
 	FormLabel,
 	FormMessage,
 } from '../ui/form';
-import { formatCnpj, formatPhoneNumber } from '@/utils/functions';
+import { formatCpfCnpj, formatPhoneNumber } from '@/utils/functions';
 import { Checkbox } from '@/components/ui/checkbox';
 import {
 	Select,
@@ -167,30 +167,33 @@ export function FirstPageSignUpForm({
 					<>
 						<FormField
 							control={form.control}
-							name="cnpj"
-							render={({ field }) => (
-								<FormItem>
-									<FormLabel htmlFor="cnpj">
-										CNPJ <span className="text-red-500">*</span>
-									</FormLabel>
+							name="cpfCnpj"
+							render={({ field }) => {
+								const isCpf = field.value.replace(/\D/g, '').length <= 11;
+								return (
+									<FormItem>
+										<FormLabel htmlFor="cpfCnpj">
+											CNPJ/CPF <span className="text-red-500">*</span>
+										</FormLabel>
 
-									<FormControl>
-										<Input
-											id="cnpj"
-											placeholder="00.000.000/0000-00"
-											{...field}
-											value={formatCnpj(field.value)}
-											onChange={(e) => {
-												const val = e.target.value.replace(/\D/g, '');
-												field.onChange(val);
-											}}
-											className="w-full border border-border rounded h-12 px-4 py-3"
-										/>
-									</FormControl>
+										<FormControl>
+											<Input
+												id="cpfCnpj"
+												placeholder={isCpf ? '000.000.000-00' : '00.000.000/0000-00'}
+												{...field}
+												value={formatCpfCnpj(field.value)}
+												onChange={(e) => {
+													const val = e.target.value.replace(/\D/g, '').slice(0, 14);
+													field.onChange(val);
+												}}
+												className="w-full border border-border rounded h-12 px-4 py-3"
+											/>
+										</FormControl>
 
-									<FormMessage />
-								</FormItem>
-							)}
+										<FormMessage />
+									</FormItem>
+								);
+							}}
 						/>
 
 						<FormField
