@@ -200,7 +200,7 @@ const enterprisesSchema = signUpCommonSchema.extend({
 	),
 	cpfCnpj: z
 		.string()
-		.min(11, 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos).')
+		.regex(/^\d+$/, 'O documento deve conter apenas dígitos.')
 		.refine((val) => val.length === 11 || val.length === 14, {
 			message: 'O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).',
 		}),

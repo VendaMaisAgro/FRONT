@@ -1,3 +1,5 @@
+import DOMPurify from 'dompurify';
+
 const signUpDocumentData = {
 	privacyPolicy: {
 		title: 'Política de Privacidade da VENDA+ Agromarket Brasil',
@@ -142,7 +144,9 @@ function getDocumentDescription(type: 'privacyPolicy' | 'termsOfUse') {
 }
 
 function getDocumentContent(type: 'privacyPolicy' | 'termsOfUse') {
-	return signUpDocumentData[type].content;
+	const content = signUpDocumentData[type].content;
+	if (typeof window === 'undefined') return content;
+	return DOMPurify.sanitize(content);
 }
 
 export { getDocumentTitle, getDocumentDescription, getDocumentContent };
