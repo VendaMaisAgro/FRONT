@@ -4,18 +4,20 @@ import { createAddress } from "@/actions/address";
 import { AddressFormValues } from "@/lib/schemas";
 import TanstackProvider from "@/providers/tanstackProvider";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import AddressForm from "../components/AddressForm";
 
 export default function AddAddressPage() {
 	const router = useRouter();
+	const searchParams = useSearchParams();
+	const redirect = searchParams.get("redirect");
 
 	async function onSubmit(data: AddressFormValues) {
 		try {
 			await createAddress(data);
 			toast.success("Endereço cadastrado com sucesso!");
-			router.push("/market/profile/personal-info/addresses");
+			router.push(redirect ?? "/market/profile/personal-info/addresses");
 		} catch (err) {
 			console.error(err);
 			toast.error("Erro ao cadastrar endereço.");

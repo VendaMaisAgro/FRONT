@@ -3,40 +3,44 @@
 import { useFormContext } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { MapPin, Package } from 'lucide-react';
+import { AlertCircle, MapPin, Package } from 'lucide-react';
 import type { PreCheckoutFormType } from './PreCheckoutForm';
-import { getAddressById } from '@/actions/address';
+import { getAddressById, getAddresses } from '@/actions/address';
 import { useEffect, useState } from 'react';
 import { Address } from '@/types/types';
 import {
 	getDescription,
 	getIcon,
 } from '@/utils/mappers/mapPaymentMethodToData';
+import Link from 'next/link';
 
 interface ReviewStepProps {
 	sellers: Array<{ id: string; name: string }>;
 	setStep: (step: number) => void;
+	onAddressError: (hasError: boolean) => void;
 }
 
-export default function ReviewStep({ sellers, setStep }: ReviewStepProps) {
+export default function ReviewStep({ sellers, setStep, onAddressError }: ReviewStepProps) {
 	const [addressData, setAddressData] = useState<Address>();
+	const [hasAddressError, setHasAddressError] = useState(false);
 	const { watch } = useFormContext<PreCheckoutFormType>();
-	// const insurance = watch("insurance");
 	const address = watch('address');
 	const transport = watch('transport');
 	const payment = watch('payment');
 
-	async function getAddressData() {
-		if (address.addressId) {
-			const res = await getAddressById(address.addressId.toString());
-
-			setAddressData(res);
-		}
-	}
+	useEffect(() => {
+		getAddresses().then((addresses) => {
+			const error = addresses.length === 0;
+			setHasAddressError(error);
+			onAddressError(error);
+		});
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
 
 	useEffect(() => {
-		getAddressData();
-	});
+		if (!address.addressId) return;
+		getAddressById(address.addressId.toString()).then(setAddressData);
+	}, [address.addressId]);
 
 	// const getInsuranceInfo = () => {
 	//     const insuranceTypes = {
@@ -106,35 +110,60 @@ export default function ReviewStep({ sellers, setStep }: ReviewStepProps) {
                 </Card> */}
 
 				{/* Endereço */}
-				<Card>
+				<Card className={hasAddressError ? 'border-red-400 bg-red-50' : ''}>
 					<CardContent className="p-4">
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-3">
-								<div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-									<MapPin className="w-5 h-5 text-green-600" />
+								<div className={`w-10 h-10 rounded-full flex items-center justify-center ${hasAddressError ? 'bg-red-100' : 'bg-green-100'}`}>
+									{hasAddressError
+										? <AlertCircle className="w-5 h-5 text-red-600" />
+										: <MapPin className="w-5 h-5 text-green-600" />
+									}
 								</div>
 								<div>
 									<p className="font-medium text-gray-900">Endereço</p>
-									<p className="flex items-center gap-2 text-gray-700">
-										{address?.type === 'retirada' ? 'Retirada' : 'Entrega'}
-									</p>
-									<p className="text-sm text-gray-600">
-										{address?.type === 'retirada'
-											? 'Retire no endereço do produtor.'
-											: addressData
-											? `${addressData.street}, ${addressData.number} - ${addressData.city} - ${addressData.uf}`
-											: 'Endereço não informado'}
-									</p>
+									{hasAddressError ? (
+										<>
+											<p className="text-sm text-red-600 font-medium">
+												Nenhum endereço cadastrado
+											</p>
+											<p className="text-sm text-red-500">
+												Cadastre um endereço para prosseguir com a compra.
+											</p>
+										</>
+									) : (
+										<>
+											<p className="flex items-center gap-2 text-gray-700">
+												{address?.type === 'retirada' ? 'Retirada' : 'Entrega'}
+											</p>
+											<p className="text-sm text-gray-600">
+												{address?.type === 'retirada'
+													? 'Retire no endereço do produtor.'
+													: addressData
+													? `${addressData.street}, ${addressData.number} - ${addressData.city} - ${addressData.uf}`
+													: 'Endereço não informado'}
+											</p>
+										</>
+									)}
 								</div>
 							</div>
-							<Button
-								variant="ghost"
-								size="sm"
-								className="text-green-600 p-0 h-auto"
-								onClick={() => setStep(0)}
-							>
-								Alterar
-							</Button>
+							{hasAddressError ? (
+								<Link
+									href="/market/profile/personal-info/addresses/new-address?redirect=/market/pre-checkout"
+									className="text-sm font-medium text-red-600 hover:text-red-700 whitespace-nowrap"
+								>
+									Cadastrar
+								</Link>
+							) : (
+								<Button
+									variant="ghost"
+									size="sm"
+									className="text-green-600 p-0 h-auto"
+									onClick={() => setStep(0)}
+								>
+									Alterar
+								</Button>
+							)}
 						</div>
 					</CardContent>
 				</Card>
