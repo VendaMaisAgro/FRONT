@@ -35,12 +35,13 @@ export async function createNewOrder(payload: CreateNewProductPayload) {
 		return {
 			success: true,
 			message: res.statusText,
-			orderId: responseData.id,
+			orderId: responseData.data?.id,
 		};
 	}
 
 	return {
 		success: false,
 		message: res.statusText,
+		code: responseData.code as string | undefined,
 	};
 }

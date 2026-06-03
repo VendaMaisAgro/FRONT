@@ -5,7 +5,8 @@ import { moneyMask } from '@/utils/functions';
 import Link from 'next/link';
 import { FormattedCartData } from '@/types/types';
 import { useRouter } from 'next/navigation';
-import React from 'react';
+import React, { useState } from 'react';
+import { getAddresses } from '@/actions/address';
 
 interface CartSummaryProps {
 	selectedCount: number;
@@ -20,9 +21,23 @@ const CartSummary: React.FC<CartSummaryProps> = ({
 }) => {
 	const router = useRouter();
 	const setCheckoutData = useCheckoutStore((state) => state.setCheckoutData);
+	const [checking, setChecking] = useState(false);
 
-	const handleContinue = () => {
+	const handleContinue = async () => {
 		if (selectedCount === 0) return;
+
+		setChecking(true);
+		try {
+			const addresses = await getAddresses();
+			if (addresses.length === 0) {
+				router.push(
+					'/market/profile/personal-info/addresses/new-address?redirect=/market/pre-checkout'
+				);
+				return;
+			}
+		} finally {
+			setChecking(false);
+		}
 
 		const products: {
 			productId: string;
@@ -52,7 +67,6 @@ const CartSummary: React.FC<CartSummaryProps> = ({
 
 		setCheckoutData({ sellersData, products, total });
 
-		// Navega sem query string
 		router.push('/market/pre-checkout');
 	};
 
@@ -74,14 +88,14 @@ const CartSummary: React.FC<CartSummaryProps> = ({
 			<div className="mb-4">
 				<button
 					onClick={handleContinue}
-					disabled={selectedCount === 0}
+					disabled={selectedCount === 0 || checking}
 					className={`w-full py-3 rounded-lg font-medium text-white ${
-						selectedCount === 0
+						selectedCount === 0 || checking
 							? 'bg-gray-400 cursor-not-allowed'
 							: 'bg-green-600 hover:bg-green-700'
 					}`}
 				>
-					Continuar
+					{checking ? 'Verificando...' : 'Continuar'}
 				</button>
 			</div>
 

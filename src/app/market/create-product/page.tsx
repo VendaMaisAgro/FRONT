@@ -1,10 +1,13 @@
 'use client';
 
+import { getAddresses } from '@/actions/address';
 import { readProductById } from '@/actions/product';
 import { createProductSchema, CreateProductSchemaType } from '@/lib/schemas';
 import { newProductFormSteps } from '@/utils/data';
 import { moneyMask } from '@/utils/functions';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { AlertCircle } from 'lucide-react';
+import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -13,6 +16,7 @@ import CreateProductForm from './components/createProductForm';
 
 export default function CadastrarProduto() {
 	const [formPosition, setFormPosition] = useState<number>(0);
+	const [hasNoAddress, setHasNoAddress] = useState(false);
 	const searchParams = useSearchParams();
 	const productId = searchParams.get('retrieveDataFrom');
 	const form = useForm<CreateProductSchemaType>({
@@ -28,6 +32,10 @@ export default function CadastrarProduto() {
 			isNegotiable: false,
 		},
 	});
+	useEffect(() => {
+		getAddresses().then((addresses) => setHasNoAddress(addresses.length === 0));
+	}, []);
+
 	useEffect(() => {
 		async function fetchAndSetProductData() {
 			if (productId) {
@@ -87,12 +95,37 @@ export default function CadastrarProduto() {
 					Passo {formPosition + 1} de {newProductFormSteps.length}
 				</p>
 			</header>
-			<CreateProductForm
-				form={form}
-				formPosition={formPosition}
-				setFormPosition={setFormPosition}
-				steps={newProductFormSteps}
-			/>
+
+			{hasNoAddress ? (
+				<div className="max-w-2xl mx-auto flex flex-col items-center gap-4 rounded-lg border border-red-200 bg-red-50 p-8 text-center">
+					<div className="flex h-14 w-14 items-center justify-center rounded-full bg-red-100">
+						<AlertCircle className="h-7 w-7 text-red-600" />
+					</div>
+					<div className="space-y-1">
+						<h2 className="text-lg font-semibold text-red-700">
+							Endereço obrigatório
+						</h2>
+						<p className="text-sm text-red-600">
+							Você precisa cadastrar um endereço antes de anunciar produtos.
+							O endereço é utilizado para que os compradores possam retirar
+							ou receber seus pedidos.
+						</p>
+					</div>
+					<Link
+						href="/market/profile/personal-info/addresses/new-address?redirect=/market/create-product"
+						className="inline-flex items-center gap-2 rounded-md bg-red-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-red-700"
+					>
+						Cadastrar endereço
+					</Link>
+				</div>
+			) : (
+				<CreateProductForm
+					form={form}
+					formPosition={formPosition}
+					setFormPosition={setFormPosition}
+					steps={newProductFormSteps}
+				/>
+			)}
 		</section>
 	);
 }

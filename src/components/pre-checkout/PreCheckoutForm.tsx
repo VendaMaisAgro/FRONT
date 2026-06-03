@@ -5,7 +5,7 @@ import { Form, FormField } from '@/components/ui/form';
 import { preCheckoutSchema } from '@/lib/schemas';
 import { useCheckoutStore } from '@/store/useCheckoutStore';
 import { checkoutSteps } from '@/utils/data';
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import * as z from 'zod';
 import AddressStep from './AddressStep';
@@ -34,6 +34,7 @@ export default function PreCheckoutForm({
 	const { getSellers, getProducts } = useCheckoutStore();
 	const sellers = getSellers();
 	const router = useRouter();
+	const [addressError, setAddressError] = useState(false);
 
 	async function onSubmit(values: PreCheckoutFormType) {
 		const products = getProducts();
@@ -54,8 +55,15 @@ export default function PreCheckoutForm({
 
 		if (res.success) {
 			toast.success(res.message);
-
 			router.push('/market/history');
+			return;
+		}
+
+		if (res.code === 'USER_ADDRESS_REQUIRED') {
+			toast.error('Cadastre um endereço antes de prosseguir com a compra.');
+			router.push(
+				'/market/profile/personal-info/addresses/new-address?redirect=/market/pre-checkout'
+			);
 			return;
 		}
 
@@ -63,6 +71,8 @@ export default function PreCheckoutForm({
 	}
 
 	async function showNextForm() {
+		if (step === 3 && addressError) return;
+
 		const fields = checkoutSteps[step]?.fields ?? [];
 		const valid = await trigger(fields as (keyof PreCheckoutFormType)[], {
 			shouldFocus: true,
@@ -120,7 +130,13 @@ export default function PreCheckoutForm({
 						/>
 					</TanstackProvider>
 				)}
-				{step === 3 && <ReviewStep sellers={sellers} setStep={setStep} />}
+				{step === 3 && (
+					<ReviewStep
+						sellers={sellers}
+						setStep={setStep}
+						onAddressError={setAddressError}
+					/>
+				)}
 
 				{step === 4 && <FormField name="terms" render={() => <TermsStep />} />}
 
@@ -139,9 +155,9 @@ export default function PreCheckoutForm({
 						type="button"
 						className="px-6 bg-green-600 hover:bg-green-700 text-white disabled:opacity-50"
 						onClick={showNextForm}
+						disabled={step === 3 && addressError}
 					>
 						{step === checkoutSteps.length ? 'Finalizar Compra' : 'Continuar'}
-						{/* Funcionou */}
 					</Button>
 				</div>
 			</form>
