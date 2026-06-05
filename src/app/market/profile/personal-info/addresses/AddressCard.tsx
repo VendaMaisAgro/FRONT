@@ -62,43 +62,46 @@ export function AddressCard({ addr }: { addr: Address }) {
 					</div>
 				</div>
 
-				<DropdownMenu modal={false}>
-					<DropdownMenuTrigger asChild>
-						<button className="p-2 rounded-full hover:bg-gray-100">
-							<MoreVertical size={20} />
-						</button>
-					</DropdownMenuTrigger>
+				<div className="flex items-center gap-1">
+					<DropdownMenu modal={false}>
+						<DropdownMenuTrigger asChild>
+							<button className="p-2 rounded-full hover:bg-gray-100">
+								<MoreVertical size={20} />
+							</button>
+						</DropdownMenuTrigger>
 
-					<DropdownMenuContent align="end" side="bottom" className="w-56">
-						{!addr.default && (
-							<DropdownMenuItem
-								className="flex items-center gap-2"
-								onClick={() => setIsNewDefaultAddressModalOpen(true)}
-							>
-								<Target className="w-4 h-4" />
-								Usar como padrão
+						<DropdownMenuContent align="end" side="bottom" className="w-56">
+							{!addr.default && (
+								<DropdownMenuItem
+									className="flex items-center gap-2"
+									onClick={() => setIsNewDefaultAddressModalOpen(true)}
+								>
+									<Target className="w-4 h-4" />
+									Usar como padrão
+								</DropdownMenuItem>
+							)}
+
+							<DropdownMenuItem className="flex items-center gap-2" asChild>
+								<Link href={`/market/profile/personal-info/addresses/${addr.id}`}>
+									<Pencil className="w-4 h-4" />
+									Editar endereço
+								</Link>
 							</DropdownMenuItem>
-						)}
+						</DropdownMenuContent>
+					</DropdownMenu>
 
-						<DropdownMenuItem className="flex items-center gap-2" asChild>
-							<Link href={`/market/profile/personal-info/addresses/${addr.id}`}>
-								<Pencil className="w-4 h-4" />
-								Editar endereço
-							</Link>
-						</DropdownMenuItem>
-
-						{!addr.default && (
-							<DropdownMenuItem
-								onClick={() => setIsDeletionModalOpen(true)}
-								className="flex items-center gap-2"
-								variant="destructive"
-							>
-								<Trash2 className="w-4 h-4" />
-								Apagar endereço
-							</DropdownMenuItem>
-						)}
-					</DropdownMenuContent>
-				</DropdownMenu>
+					<button
+						className={`p-2 rounded-full transition-colors ${
+							addr.default
+								? 'invisible'
+								: 'hover:bg-red-50 text-red-500 hover:text-red-600'
+						}`}
+						onClick={() => !addr.default && setIsDeletionModalOpen(true)}
+						title="Apagar endereço"
+					>
+						<Trash2 size={18} />
+					</button>
+				</div>
 			</div>
 
 			<ConfirmAddressExclusionModal

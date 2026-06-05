@@ -35,7 +35,7 @@ export default function AddressesClient({
 				<Button asChild variant="default">
 					<Link href="/market/profile/personal-info/addresses/new-address">
 						<MapPinPlus className="mr-1 h-4 w-4" />
-						Cadastrar Endereço
+						Cadastrar Novo Endereço
 					</Link>
 				</Button>
 			</div>
@@ -56,7 +56,7 @@ export default function AddressesClient({
 						<Button asChild variant="default">
 							<Link href="/market/profile/personal-info/addresses/new-address">
 								<MapPinPlus className="mr-2 h-4 w-4" />
-								Cadastrar Endereço
+								Cadastrar Novo Endereço
 							</Link>
 						</Button>
 					</div>
