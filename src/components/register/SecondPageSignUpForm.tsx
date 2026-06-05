@@ -14,6 +14,21 @@ export function SecondPageSignUpForm({
 }: {
 	form: UseFormReturn<SignUpFormValues>;
 }) {
+	const cpfCnpj = form.watch('cpfCnpj');
+	const isCpf = cpfCnpj.replace(/\D/g, '').length <= 11;
+
+	const questions = isCpf
+		? {
+				first: '3 primeiros dígitos do CPF',
+				second: 'Qual a cidade que você nasceu',
+				third: 'Ano de nascimento (aaaa)',
+			}
+		: {
+				first: '3 primeiros dígitos do CNPJ',
+				second: 'Qual a cidade sede da sua empresa',
+				third: 'Ano de abertura da empresa (aaaa)',
+			};
+
 	return (
 		<>
 			<FormField
@@ -22,7 +37,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="firstSecurityQuestion">
-							3 primeiros dígitos do CNPJ. <span className="text-red-500">*</span>
+							{questions.first} <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>
@@ -45,7 +60,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="secondSecurityQuestion">
-							Qual cidade sede da sua empresa. <span className="text-red-500">*</span>
+							{questions.second} <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>
@@ -68,7 +83,7 @@ export function SecondPageSignUpForm({
 				render={({ field }) => (
 					<FormItem>
 						<FormLabel htmlFor="thirdSecurityQuestion">
-							Ano de abertura da sua empresa (aaaa). <span className="text-red-500">*</span>
+							{questions.third} <span className="text-red-500">*</span>
 						</FormLabel>
 
 						<FormControl>

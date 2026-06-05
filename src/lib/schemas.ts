@@ -143,77 +143,42 @@ export const signInSchema = z.object({
 	password: z.string().min(6, 'A senha deve ter no mínimo 6 caracteres.'),
 });
 
-const signUpCommonSchema = z.object({
-	name: z.string().min(1, 'O nome completo é obrigatório.').max(50),
-	phone_number: z.string().min(10, 'O telefone deve ter DDD + 8 ou 9 dígitos.'),
-	email: z.string().email('Insira um email válido.'),
-	password: z.string().min(8, 'Sua senha deve ter no mínimo 8 caracteres.'),
-	confirmPassword: z.string(),
-	acceptPrivacyPolicy: z
-		.boolean({
-			required_error: 'Aceite os termos de privacidade para continuar.',
-		})
-		.refine((data) => data, {
-			message: 'Aceite os termos de privacidade para continuar.',
-		}),
-	acceptTermsOfUse: z
-		.boolean({
-			required_error: 'Aceite os termos de uso para continuar.',
-		})
-		.refine((data) => data, {
-			message: 'Aceite os termos de uso para continuar.',
-		}),
-	firstSecurityQuestion: z
-		.string()
-		.min(1, 'Por favor responda a pergunta de segurança.'),
-	secondSecurityQuestion: z
-		.string()
-		.min(1, 'Por favor responda a pergunta de segurança.'),
-	thirdSecurityQuestion: z
-		.string()
-		.min(1, 'Por favor responda a pergunta de segurança.'),
-});
-
-const enterprisesSchema = signUpCommonSchema.extend({
-	userType: z.enum(
-		[
-			'distributor',
-			'cooperative-or-partnership',
-			'farmer',
-			'wholesaler',
-			'supermarket',
-		],
-		{
-			errorMap: (issue) => {
-				switch (issue.code) {
-					case 'invalid_enum_value':
-						return { message: 'Por favor, selecione um tipo de usuário válido.' };
-					case 'invalid_union_discriminator':
-						return { message: 'O tipo de usuário é obrigatório.' };
-					default:
-						return {
-							message: 'Ocorreu um erro na validação do tipo de usuário.',
-						};
-				}
-			},
-		}
-	),
-	cpfCnpj: z
-		.string()
-		.regex(/^\d+$/, 'O documento deve conter apenas dígitos.')
-		.refine((val) => val.length === 11 || val.length === 14, {
-			message: 'O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).',
-		}),
-	ccir: z.string().optional(),
-});
-
-// const buyerSchema = signUpCommonSchema.extend({
-// 	userType: z.literal("buyer"),
-// 	cpf: z.string().min(11, "O CPF deve ter exatamente 11 dígitos."),
-// });
-
 export const signUpSchema = z
-	.discriminatedUnion('userType', [enterprisesSchema])
+	.object({
+		userType: z.enum(
+			[
+				'distributor',
+				'cooperative-or-partnership',
+				'farmer',
+				'wholesaler',
+				'supermarket',
+			],
+			{
+				errorMap: () => ({ message: 'Escolha o tipo de usuário' }),
+			}
+		),
+		name: z.string().min(1, 'Preencha com seu nome').max(50),
+		phone_number: z.string().min(10, 'Preencha com um número válido'),
+		email: z.string().email('Preencha com um email válido'),
+		password: z.string().min(8, 'Crie uma senha válida'),
+		confirmPassword: z.string(),
+		acceptPrivacyPolicy: z
+			.boolean({ required_error: 'Aceite os termos de privacidade para continuar.' })
+			.refine((data) => data, { message: 'Aceite os termos de privacidade para continuar.' }),
+		acceptTermsOfUse: z
+			.boolean({ required_error: 'Aceite os termos de uso para continuar.' })
+			.refine((data) => data, { message: 'Aceite os termos de uso para continuar.' }),
+		firstSecurityQuestion: z.string().min(1, 'Por favor responda a pergunta de segurança.'),
+		secondSecurityQuestion: z.string().min(1, 'Por favor responda a pergunta de segurança.'),
+		thirdSecurityQuestion: z.string().min(1, 'Por favor responda a pergunta de segurança.'),
+		cpfCnpj: z
+			.string()
+			.regex(/^\d+$/, 'O documento deve conter apenas dígitos.')
+			.refine((val) => val.length === 11 || val.length === 14, {
+				message: 'O documento deve ter 11 dígitos (CPF) ou 14 dígitos (CNPJ).',
+			}),
+		ccir: z.string().optional(),
+	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: 'As senhas não coincidem.',
 		path: ['confirmPassword'],

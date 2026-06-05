@@ -20,6 +20,39 @@ import {
 import PasswordInput from '../passwordInput';
 import { Input } from '../ui/input';
 import DocumentsDialog from './DocumentsDialog';
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from '@/components/ui/tooltip';
+import { Check, HelpCircle } from 'lucide-react';
+
+function PasswordRequirements({ password }: { password: string }) {
+	const items = [
+		{ label: 'Senha com no mínimo 8 caracteres', met: password.length >= 8 },
+		{ label: 'Ao menos uma letra maiúscula (A-Z)', met: /[A-Z]/.test(password) },
+		{ label: 'Ao menos uma letra minúscula (a-z)', met: /[a-z]/.test(password) },
+		{ label: 'Números (0-9)', met: /[0-9]/.test(password) },
+		{ label: 'Caracteres especiais ($, %, @, …)', met: /[^A-Za-z0-9]/.test(password) },
+	];
+
+	return (
+		<ul className="mt-2 space-y-1 text-xs">
+			{items.map((item) => (
+				<li
+					key={item.label}
+					className={`flex items-center gap-1.5 transition-colors ${item.met ? 'text-green-600' : 'text-gray-900'}`}
+				>
+					{item.met
+						? <Check className="h-3 w-3 shrink-0" />
+						: <span className="h-3 w-3 shrink-0 flex items-center justify-center text-[10px]">•</span>
+					}
+					{item.label}
+				</li>
+			))}
+		</ul>
+	);
+}
 
 export function FirstPageSignUpForm({
 	form,
@@ -69,7 +102,7 @@ export function FirstPageSignUpForm({
 				name="userType"
 				render={({ field }) => (
 					<FormItem>
-						<FormLabel>Tipo de usuário</FormLabel>
+						<FormLabel>Tipo de usuário <span className="text-red-500">*</span></FormLabel>
 
 						<Select
 							onValueChange={(v) =>
@@ -201,7 +234,19 @@ export function FirstPageSignUpForm({
 							name="ccir"
 							render={({ field }) => (
 								<FormItem>
-									<FormLabel htmlFor="ccir">CCIR</FormLabel>
+									<div className="flex items-center gap-1.5">
+										<FormLabel htmlFor="ccir">CCIR</FormLabel>
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<button type="button" className="text-gray-400 hover:text-gray-600 focus:outline-none">
+													<HelpCircle className="h-4 w-4" />
+												</button>
+											</TooltipTrigger>
+											<TooltipContent className="max-w-72 text-wrap leading-relaxed">
+												O CCIR (Certificado de Cadastro de Imóvel Rural) é emitido pelo INCRA e identifica imóveis rurais no Brasil. Necessário para financiamentos e regularização fundiária. Campo opcional.
+											</TooltipContent>
+										</Tooltip>
+									</div>
 
 									<FormControl>
 										<Input
@@ -260,7 +305,7 @@ export function FirstPageSignUpForm({
 							<Input
 								id="email"
 								type="email"
-								placeholder="Digite seu email"
+								placeholder="usuario@email.com"
 								{...field}
 								className="w-full border border-border rounded h-12 px-4 py-3"
 							/>
@@ -283,6 +328,8 @@ export function FirstPageSignUpForm({
 						<FormControl>
 							<PasswordInput field={field} />
 						</FormControl>
+
+						<PasswordRequirements password={field.value} />
 
 						<FormMessage />
 					</FormItem>
