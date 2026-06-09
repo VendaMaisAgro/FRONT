@@ -185,6 +185,7 @@ export type OrderAction = 'accepted' | 'rejected' | null;
 
 export type Order = {
 	id: string;
+	orderNumber?: number;
 	buyer: string;
 	product: string;
 	description?: string;
@@ -288,6 +289,8 @@ export type SaleData = {
 	 */
 	sellerApproved?: boolean | null;
 	cargoWeightKg?: string;
+	orderNumber?: number;
+	packagingType?: string | null;
 	buyer: SaleBuyer;
 	boughtProducts: SaleBoughtProduct[];
 	shippingAddress: SaleShippingAddress;

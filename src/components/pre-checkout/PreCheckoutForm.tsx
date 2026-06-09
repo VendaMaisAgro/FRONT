@@ -31,7 +31,7 @@ export default function PreCheckoutForm({
 }: IPreCheckoutFormProps) {
 	const form = useFormContext<PreCheckoutFormType>();
 	const { trigger, control, handleSubmit } = form;
-	const { getSellers, getProducts } = useCheckoutStore();
+	const { getSellers, getProducts, packagingType } = useCheckoutStore();
 	const sellers = getSellers();
 	const router = useRouter();
 	const [addressError, setAddressError] = useState(false);
@@ -44,6 +44,7 @@ export default function PreCheckoutForm({
 			addressId: null,
 			transportValue: 0, //! era pro back cuidar disso lol
 			paymentMethodId: values.payment.methodId,
+			packagingType: packagingType || undefined,
 			boughtProducts: products.map((p) => ({
 				productId: p.productId,
 				sellingUnitProductId: p.sellingUnitProductId,

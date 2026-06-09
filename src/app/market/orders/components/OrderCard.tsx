@@ -31,7 +31,7 @@ export function OrderCard({
       <CardContent className="px-4 md:px-6">
         <div className="flex flex-col gap-4">
           <div className="text-green-600 text-lg font-semibold">
-            Pedido #{order.id}
+            Pedido #{order.orderNumber ?? order.id}
           </div>
 
           <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:items-center">
