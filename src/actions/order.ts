@@ -8,6 +8,7 @@ interface CreateNewProductPayload {
 	transportValue: number;
 	addressId: string | null;
 	paymentMethodId: string;
+	packagingType?: string;
 	boughtProducts: {
 		productId: string;
 		sellingUnitProductId: string;

@@ -19,6 +19,7 @@ export type OrderItemView = {
 
 export type OrderView = {
     id: string
+    orderNumber?: number
     dateLabel: string
     total: number
     deliveryDateLabel?: string
@@ -57,7 +58,7 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
             <div className="md:hidden">
                 <div className="px-4 py-3 border-b border-gray-100">
                     <div className="flex items-center justify-between">
-                        <p className="text-sm text-gray-600">Pedido feito em {order.dateLabel}</p>
+                        <p className="text-sm text-gray-600">{order.orderNumber ? <span className="font-medium text-green-700 mr-1">Pedido #{order.orderNumber}</span> : null}feito em {order.dateLabel}</p>
                         <Button variant="link" size="sm" className="text-blue-600 hover:text-blue-700 p-0 h-auto text-sm">
                             Comprar novamente
                         </Button>
@@ -220,7 +221,7 @@ export default React.memo(function OrderCard({ order }: { order: OrderView }) {
                     </div>
 
                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100">
-                        <p className="text-sm text-gray-600">Pedido feito em {order.dateLabel}</p>
+                        <p className="text-sm text-gray-600">{order.orderNumber ? <span className="font-medium text-green-700 mr-1">Pedido #{order.orderNumber}</span> : null}feito em {order.dateLabel}</p>
                         <p className="font-semibold text-gray-900">Total {currencyFormatter(order.total)}</p>
                     </div>
                 </CardContent>

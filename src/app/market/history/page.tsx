@@ -78,6 +78,7 @@ export default function OrderHistoryPage() {
 
             return {
               id: s.id,
+              orderNumber: s.orderNumber,
               dateLabel: formatDate(s.createdAt),
               createdAtISO: s.createdAt,
               total,

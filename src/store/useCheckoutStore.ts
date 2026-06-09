@@ -16,6 +16,7 @@ interface OrderData {
 
 interface CheckoutState {
 	data: OrderData | null;
+	packagingType: string;
 	productsAmount: () => number;
 	orderValue: () => number;
 	getSellers: () => { id: string; name: string }[];
@@ -26,10 +27,12 @@ interface CheckoutState {
 		amount: number;
 	}[];
 	setCheckoutData: (data: OrderData) => void;
+	setPackagingType: (type: string) => void;
 }
 
 export const useCheckoutStore = create<CheckoutState>((set, get) => ({
 	data: null,
+	packagingType: "",
 	productsAmount: () => {
 		const { data } = get();
 
@@ -59,4 +62,5 @@ export const useCheckoutStore = create<CheckoutState>((set, get) => ({
 		set(() => ({
 			data: data || [],
 		})),
+	setPackagingType: (type) => set(() => ({ packagingType: type })),
 }));
