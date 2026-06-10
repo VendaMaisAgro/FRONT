@@ -21,7 +21,11 @@ export async function getSalesData(): Promise<SalesApiResponse> {
       throw new Error(`Erro na API: ${response.status} ${response.statusText}`);
     }
 
-    const data: SalesApiResponse = await response.json();
+    const raw = await response.json();
+    // O backend pode retornar um array direto ou o wrapper { message, sales: [] }
+    const data: SalesApiResponse = Array.isArray(raw)
+      ? { message: "", totalSales: raw.length, totalValue: 0, sales: raw }
+      : raw;
     return data;
   } catch (error) {
     console.error("Erro ao buscar dados de vendas:", error);
