@@ -10,6 +10,7 @@ export async function GET() {
     headers: {
       Authorization: `Bearer ${token.jwt}`,
     },
+    cache: "no-store",
   });
   
   if (res.ok) {
