@@ -66,26 +66,27 @@ const reverseStatusMap: Record<OrderStatus, string> = {
 
 // Função para transformar dados da API em formato de Order
 function transformSaleDataToOrder(sale: SaleData): Order {
-	// Criar string de produtos comprados
-	const productsString = sale.boughtProducts
-		.map(
-			(bp) =>
-				`${bp.amount}${bp.sellingUnitProduct.unit.unit} ${bp.product.name}`
-		)
+	// Criar string de produtos comprados (objetos aninhados podem não vir em produção)
+	const productsString = (sale.boughtProducts ?? [])
+		.map((bp) => {
+			const unit = bp.sellingUnitProduct?.unit?.unit ?? bp.sellingUnitProduct?.unit?.title ?? "";
+			const name = bp.product?.name ?? `Produto #${bp.productId}`;
+			return unit ? `${bp.amount}${unit} ${name}` : `${bp.amount}x ${name}`;
+		})
 		.join(", ");
 
 	// Calcular valor total (produtos + frete)
 	const totalValue =
-		sale.boughtProducts.reduce((sum, bp) => sum + bp.value, 0) +
-		sale.transportValue;
+		(sale.boughtProducts ?? []).reduce((sum, bp) => sum + Number(bp.value), 0) +
+		Number(sale.transportValue ?? 0);
 
 	return {
 		id: sale.id,
 		orderNumber: sale.orderNumber,
-		buyer: sale.buyer.name,
-		product: productsString,
+		buyer: sale.buyer?.name ?? "Comprador",
+		product: productsString || "—",
 		value: totalValue,
-		payment: sale.paymentMethod.method,
+		payment: sale.paymentMethod?.method ?? "",
 		status: statusMap[sale.status] || "new",
 		action:
 			sale.sellerApproved === true
