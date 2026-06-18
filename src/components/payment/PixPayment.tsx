@@ -80,6 +80,7 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
     }, [status, paymentData.paymentId, onSuccess, router]);
 
     const copyToClipboard = () => {
+        if (!qr_code) return;
         navigator.clipboard.writeText(qr_code);
         toast.success("Código PIX copiado!");
     };
