@@ -35,7 +35,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // URL corrigida: /payment/pix (definida em payment.route.ts e montada em /payment)
         const res = await fetch(`${process.env.API_URL}/payment/pix`, {
             method: "POST",
             headers: {

@@ -166,14 +166,15 @@ export default function PaymentPage() {
 
             const paymentData = {
                 saleId: sale.id,
-                paymentMethodId: String(paymentMethodId).trim(), // Garantir que é string e remover espaços
+                paymentMethodId: String(paymentMethodId).trim(),
                 productId: sale.boughtProducts[0].productId,
                 title: sanitizeString(`Pedido ${sale.id.substring(0, 8)} - ${vendorName}`, 100),
                 unit_price: precoMedio,
                 quantity: quantidadeTotal,
                 amount: totalGeral,
-                email: sale.buyer?.email || 'email@nao-informado.com', // Necessário para PIX
-                expirationDays: 3 // Padrão para boleto
+                email: sale.buyer?.email || 'email@nao-informado.com',
+                ...(isPix && { expirationMinutes: 1440 }),
+                ...(isBoleto && { expirationDays: 3 }),
             }
 
             // Validar dados antes de enviar
