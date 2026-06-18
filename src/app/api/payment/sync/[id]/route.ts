@@ -24,7 +24,6 @@ export async function GET(
             return NextResponse.json({ error: "Payment ID is required" }, { status: 400 });
         }
 
-        // URL corrigida: /payment/{id}/sync (definida em payment.route.ts e montada em /payment)
         const res = await fetch(`${process.env.API_URL}/payment/${id}/sync`, {
             method: "POST", // Backend usa POST para sync
             headers: {

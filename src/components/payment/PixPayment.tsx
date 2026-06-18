@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Copy, CheckCircle, XCircle, RefreshCw } from "lucide-react";
+import { Loader2, Copy, CheckCircle, XCircle, ExternalLink } from "lucide-react";
 import { toast } from "sonner";
 import { PixPaymentResponse, PaymentSyncResponse } from "@/types/types";
 import { useRouter } from "next/navigation";
@@ -13,13 +13,33 @@ interface PixPaymentProps {
     onSuccess?: () => void;
 }
 
+function useExpirationCountdown(dateOfExpiration: string) {
+    const [timeLeft, setTimeLeft] = useState<string>("");
+
+    useEffect(() => {
+        const update = () => {
+            const diff = new Date(dateOfExpiration).getTime() - Date.now();
+            if (diff <= 0) { setTimeLeft("Expirado"); return; }
+            const h = Math.floor(diff / 3600000);
+            const m = Math.floor((diff % 3600000) / 60000);
+            const s = Math.floor((diff % 60000) / 1000);
+            setTimeLeft(h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`);
+        };
+        update();
+        const id = setInterval(update, 1000);
+        return () => clearInterval(id);
+    }, [dateOfExpiration]);
+
+    return timeLeft;
+}
+
 export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) {
     const router = useRouter();
-    const [status, setStatus] = useState<string>(paymentData.payment.status);
-    const [loading, setLoading] = useState(false);
+    const [status, setStatus] = useState<string>(paymentData.status);
     const [cancelling, setCancelling] = useState(false);
 
-    const { qr_code, qr_code_base64, ticket_url, id: paymentId } = paymentData.payment;
+    const { qr_code, qr_code_base64, ticket_url } = paymentData.pix;
+    const timeLeft = useExpirationCountdown(paymentData.date_of_expiration);
 
     // Polling para verificar status
     useEffect(() => {
@@ -143,7 +163,7 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
                     <div className="border-4 border-white shadow-lg rounded-lg overflow-hidden">
                         {qr_code_base64 ? (
                             <img
-                                src={`data:image/jpeg;base64,${qr_code_base64}`}
+                                src={`data:image/png;base64,${qr_code_base64}`}
                                 alt="QR Code PIX"
                                 className="w-64 h-64 object-contain"
                             />
@@ -156,7 +176,7 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
 
                     <div className="text-center space-y-1">
                         <p className="text-sm font-medium text-gray-700">Tempo para pagamento</p>
-                        <p className="text-xs text-gray-500">O QR Code expira em 30 minutos</p>
+                        <p className="text-xs text-gray-500">Expira em: <span className="font-mono font-semibold">{timeLeft}</span></p>
                     </div>
                 </div>
 
@@ -178,6 +198,17 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
                 </div>
 
                 <div className="pt-4 flex flex-col gap-3">
+                    {ticket_url && (
+                        <Button
+                            variant="outline"
+                            className="w-full gap-2"
+                            onClick={() => window.open(ticket_url, '_blank')}
+                        >
+                            <ExternalLink className="h-4 w-4" />
+                            Abrir página de pagamento
+                        </Button>
+                    )}
+
                     <div className="flex items-center justify-center gap-2 text-sm text-blue-600 bg-blue-50 p-3 rounded-md">
                         <Loader2 className="h-4 w-4 animate-spin" />
                         Aguardando confirmação do pagamento...

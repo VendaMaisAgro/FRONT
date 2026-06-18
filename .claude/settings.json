@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT log --oneline -- src/app/market/orders/components/OrdersClient.tsx)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT show HEAD:src/app/market/orders/components/OrdersClient.tsx)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT show c5e3b90:src/actions/sales.ts)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT diff HEAD -- src/actions/sales.ts src/app/api/sales/route.ts)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT show HEAD:src/actions/sales.ts)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT log --oneline origin/main..HEAD)",
+      "Bash(git -C /home/mateus/Documentos/Venda+Agromarket/FRONT remote get-url origin)"
+    ]
+  }
+}

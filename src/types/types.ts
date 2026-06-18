@@ -356,12 +356,11 @@ export type PixPaymentParams = {
 
 export type PixPaymentResponse = {
 	paymentId: string;
-	orderId: string;
-	orderStatus: string;
-	payment: {
-		id: string;
-		status: string;
-		status_detail: string;
+	mp_payment_id: number;
+	status: string;
+	status_detail: string;
+	date_of_expiration: string;
+	pix: {
 		qr_code: string;
 		qr_code_base64: string;
 		ticket_url: string;

@@ -34,17 +34,6 @@ export async function POST(req: NextRequest) {
             );
         }
 
-        // URL do backend: /payment/boleto (assumindo padrão similar ao PIX)
-        // Nota: A documentação diz /payment-methods/boleto, mas o PIX era /payment/pix.
-        // Vou usar /payment/boleto seguindo a correção anterior do PIX, mas se falhar ajusto.
-        // Verificando payment_integration.md: diz POST /payment-methods/boleto
-        // Mas no PIX também dizia e era /payment/pix.
-        // Vou verificar o arquivo payment.route.ts do backend novamente para ter certeza absoluta.
-
-        // Melhor verificar antes de commitar a rota.
-        // Vou criar com /payment/boleto por coerência com o PIX que corrigimos, 
-        // mas vou verificar o backend logo em seguida.
-
         const res = await fetch(`${process.env.API_URL}/payment/boleto`, {
             method: "POST",
             headers: {
