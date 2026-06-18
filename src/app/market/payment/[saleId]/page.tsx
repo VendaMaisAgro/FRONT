@@ -156,8 +156,6 @@ export default function PaymentPage() {
                 return;
             }
 
-            console.log('DEBUG DETECT:', { isPix, isBoleto, isCard })
-
             if (!paymentMethodId) {
                 setError('Método de pagamento não encontrado no pedido')
                 setProcessing(false)
@@ -181,7 +179,6 @@ export default function PaymentPage() {
             // Para PIX, usamos validação específica se necessário, mas validatePaymentData cobre o básico
             const validation = validatePaymentData(paymentData)
             if (!validation.valid) {
-                console.error('Validação falhou:', validation.error, paymentData)
                 setError(validation.error || 'Dados inválidos')
                 setProcessing(false)
                 return
@@ -203,7 +200,6 @@ export default function PaymentPage() {
             })
 
             const result = await res.json()
-            console.log('PIX API response:', JSON.stringify(result, null, 2))
 
             if (!res.ok) {
                 // Mensagens de erro mais específicas

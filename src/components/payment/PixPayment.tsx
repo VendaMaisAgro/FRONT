@@ -13,33 +13,12 @@ interface PixPaymentProps {
     onSuccess?: () => void;
 }
 
-function useExpirationCountdown(dateOfExpiration: string) {
-    const [timeLeft, setTimeLeft] = useState<string>("");
-
-    useEffect(() => {
-        const update = () => {
-            const diff = new Date(dateOfExpiration).getTime() - Date.now();
-            if (diff <= 0) { setTimeLeft("Expirado"); return; }
-            const h = Math.floor(diff / 3600000);
-            const m = Math.floor((diff % 3600000) / 60000);
-            const s = Math.floor((diff % 60000) / 1000);
-            setTimeLeft(h > 0 ? `${h}h ${m}m ${s}s` : `${m}m ${s}s`);
-        };
-        update();
-        const id = setInterval(update, 1000);
-        return () => clearInterval(id);
-    }, [dateOfExpiration]);
-
-    return timeLeft;
-}
-
 export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) {
     const router = useRouter();
-    const [status, setStatus] = useState<string>(paymentData.status);
+    const [status, setStatus] = useState<string>(paymentData.payment.status);
     const [cancelling, setCancelling] = useState(false);
 
-    const { qr_code, qr_code_base64, ticket_url } = paymentData.pix ?? {};
-    const timeLeft = useExpirationCountdown(paymentData.date_of_expiration ?? '');
+    const { qr_code, qr_code_base64, ticket_url } = paymentData.payment;
 
     // Polling para verificar status
     useEffect(() => {
@@ -60,7 +39,6 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
                     if (data.payment.status === "completed") {
                         toast.success("Pagamento confirmado!");
                         if (onSuccess) onSuccess();
-                        // Recarregar a página para atualizar o estado do pedido
                         router.refresh();
                     }
                 }
@@ -69,7 +47,6 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
             }
         };
 
-        // Verificar a cada 5 segundos
         if (status === "pending" || status === "action_required") {
             intervalId = setInterval(checkStatus, 5000);
         }
@@ -174,11 +151,6 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
                             </div>
                         )}
                     </div>
-
-                    <div className="text-center space-y-1">
-                        <p className="text-sm font-medium text-gray-700">Tempo para pagamento</p>
-                        <p className="text-xs text-gray-500">Expira em: <span className="font-mono font-semibold">{timeLeft}</span></p>
-                    </div>
                 </div>
 
                 <div className="space-y-3">
@@ -189,10 +161,10 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
                         <input
                             type="text"
                             readOnly
-                            value={qr_code}
+                            value={qr_code ?? ""}
                             className="flex-1 px-3 py-2 border rounded-md text-sm bg-gray-50 text-gray-600 focus:outline-none"
                         />
-                        <Button size="icon" variant="outline" onClick={copyToClipboard}>
+                        <Button size="icon" variant="outline" onClick={copyToClipboard} disabled={!qr_code}>
                             <Copy className="h-4 w-4" />
                         </Button>
                     </div>
