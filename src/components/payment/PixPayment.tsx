@@ -38,8 +38,8 @@ export default function PixPayment({ paymentData, onSuccess }: PixPaymentProps) 
     const [status, setStatus] = useState<string>(paymentData.status);
     const [cancelling, setCancelling] = useState(false);
 
-    const { qr_code, qr_code_base64, ticket_url } = paymentData.pix;
-    const timeLeft = useExpirationCountdown(paymentData.date_of_expiration);
+    const { qr_code, qr_code_base64, ticket_url } = paymentData.pix ?? {};
+    const timeLeft = useExpirationCountdown(paymentData.date_of_expiration ?? '');
 
     // Polling para verificar status
     useEffect(() => {

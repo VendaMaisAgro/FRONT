@@ -360,10 +360,10 @@ export type PixPaymentResponse = {
 	status: string;
 	status_detail: string;
 	date_of_expiration: string;
-	pix: {
-		qr_code: string;
-		qr_code_base64: string;
-		ticket_url: string;
+	pix?: {
+		qr_code?: string;
+		qr_code_base64?: string;
+		ticket_url?: string;
 	};
 };
 
