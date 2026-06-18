@@ -203,6 +203,7 @@ export default function PaymentPage() {
             })
 
             const result = await res.json()
+            console.log('PIX API response:', JSON.stringify(result, null, 2))
 
             if (!res.ok) {
                 // Mensagens de erro mais específicas
