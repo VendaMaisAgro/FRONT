@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import ContractTemplate, { PreCheckoutData } from "@/components/sale/ContractTemplate";
 import type { ContractContextData } from "@/components/sale/ContractTemplate";
@@ -13,7 +13,7 @@ type ContractState =
   | { status: "error"; message: string }
   | { status: "empty" };
 
-export default function ContratoPreviewPage() {
+function ContratoPreviewContent() {
   const searchParams = useSearchParams();
   const saleId = searchParams.get("saleId");
   const [state, setState] = useState<ContractState>({ status: "loading" });
@@ -108,5 +108,18 @@ export default function ContratoPreviewPage() {
         }
       `}</style>
     </div>
+  );
+}
+
+export default function ContratoPreviewPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-white flex items-center justify-center gap-3 text-gray-400">
+        <LoaderCircle className="w-6 h-6 animate-spin" />
+        Carregando...
+      </div>
+    }>
+      <ContratoPreviewContent />
+    </Suspense>
   );
 }
