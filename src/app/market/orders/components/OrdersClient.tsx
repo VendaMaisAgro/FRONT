@@ -315,13 +315,21 @@ export default function OrdersClient() {
 				...((acceptanceContractData?.conditions as Record<string, unknown>) ?? {}),
 				...dates,
 			};
-			await acceptContract({
+			const contractResult = await acceptContract({
 				saleId: pendingAcceptOrderId,
 				buyer:  acceptanceContractData?.buyer,
 				seller: acceptanceContractData?.seller,
 				items:  acceptanceContractData?.items as import("@/store/useCheckoutStore").ContractItem[] | undefined,
 				conditions: conditions as import("@/store/useCheckoutStore").ContractConditions,
-			}).catch((err) => console.error("[acceptContract]", err));
+			}).catch((err) => { console.error("[acceptContract]", err); return { success: false, error: String(err) }; });
+
+			if (contractResult && !contractResult.success) {
+				console.error("[acceptContract]", contractResult.error);
+				if (contractResult.error?.toLowerCase().includes("permiss")) {
+					setAcceptDateError("Você não tem permissão para assinar este contrato.");
+					return;
+				}
+			}
 
 			// 3) Atualiza status para "Em processamento"
 			await updateSaleStatus(pendingAcceptOrderId, reverseStatusMap["processing"]);
