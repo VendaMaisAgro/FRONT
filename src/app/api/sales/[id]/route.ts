@@ -12,14 +12,20 @@ export async function PUT(
 
   try {
     const body = await request.json();
-    const { status, cargoWeightKg } = body;
+    const { status, cargoWeightKg, plannedHarvestDate, plannedPickupDate, plannedDeliveryDate } = body;
 
-    const requestBody: { status?: string; cargoWeightKg?: number | string } = {};
-    
+    const requestBody: {
+      status?: string;
+      cargoWeightKg?: number | string;
+      plannedHarvestDate?: string;
+      plannedPickupDate?: string;
+      plannedDeliveryDate?: string;
+    } = {};
+
     if (status) {
       requestBody.status = status;
     }
-    
+
     if (cargoWeightKg) {
       const weightAsNumber = Number(cargoWeightKg);
       if (!isNaN(weightAsNumber)) {
@@ -28,6 +34,10 @@ export async function PUT(
         requestBody.cargoWeightKg = cargoWeightKg;
       }
     }
+
+    if (plannedHarvestDate) requestBody.plannedHarvestDate = plannedHarvestDate;
+    if (plannedPickupDate) requestBody.plannedPickupDate = plannedPickupDate;
+    if (plannedDeliveryDate) requestBody.plannedDeliveryDate = plannedDeliveryDate;
 
     const res = await fetch(`${process.env.API_URL}/sales/${id}`, {
       method: "PUT",
@@ -43,7 +53,12 @@ export async function PUT(
       return NextResponse.json(data);
     }
 
-    return NextResponse.error();
+    try {
+      const errData = await res.json();
+      return NextResponse.json(errData, { status: res.status });
+    } catch {
+      return NextResponse.json({ error: "Erro ao atualizar pedido" }, { status: res.status });
+    }
   } catch (error) {
     console.error(error);
     return NextResponse.error();

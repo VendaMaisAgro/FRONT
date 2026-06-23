@@ -13,7 +13,6 @@ export async function GET() {
   });
   if (res.ok) {
     const data = await res.json();
-    console.log(data);
     return NextResponse.json(data);
   }
   return NextResponse.error();

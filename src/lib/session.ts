@@ -44,8 +44,8 @@ export async function createSession(payload: UserPayload) {
   (await cookies()).set(cookie.name, session, { ...cookie.options, expires });
 }
 
-export async function verifySession(cookie: string | undefined) {
-  const session = await decrypt(cookie);
+export async function verifySession(sessionToken: string | undefined) {
+  const session = await decrypt(sessionToken);
 
   if (!session?.id) {
     redirect("/login");

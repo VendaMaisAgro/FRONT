@@ -59,7 +59,8 @@ export async function updateSaleStatus(saleId: string, status: string): Promise<
 
 export async function updateSellerDecision(
   saleId: string,
-  approved: boolean | null
+  approved: boolean | null,
+  dates?: { plannedHarvestDate?: string; plannedPickupDate?: string; plannedDeliveryDate?: string }
 ): Promise<void> {
   const cookieStore = await cookies();
   const token = cookieStore.get("session")?.value;
@@ -73,7 +74,7 @@ export async function updateSellerDecision(
           Cookie: `session=${token}`,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ approved }),
+        body: JSON.stringify({ approved, ...(dates ?? {}) }),
       }
     );
 

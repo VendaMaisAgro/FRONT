@@ -226,10 +226,6 @@ export const preCheckoutSchema = z.object({
 	payment: z.object({
 		methodId: z.string(),
 		method: z.string(),
-		// cardNumber: z.string().optional(),
-		// cardName: z.string().optional(),
-		// cardExpiry: z.string().optional(),
-		// cardCvv: z.string().optional(),
 	}),
 	terms: z.object({
 		accepted: z.boolean().refine((val) => val === true, {

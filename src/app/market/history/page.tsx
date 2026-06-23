@@ -21,6 +21,7 @@ export default function OrderHistoryPage() {
   const [statusFilter, setStatusFilter] = useState<'all' | 'pending' | 'delivered' | 'rejected'>('all')
   const [periodFilter, setPeriodFilter] = useState<'all' | 'week' | 'fortnight' | 'month' | 'year'>('all')
   const [orders, setOrders] = useState<(OrderView & { createdAtISO: string })[]>([])
+  const [rawSales, setRawSales] = useState<SaleData[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -83,6 +84,7 @@ export default function OrderHistoryPage() {
               createdAtISO: s.createdAt,
               total,
               deliveryDateLabel: s.arrivedAt ? formatDate(s.arrivedAt) : undefined,
+              actualDeliveryDate: s.actualDeliveryDate,
               status,
               statusLabel,
               items,
@@ -94,6 +96,7 @@ export default function OrderHistoryPage() {
           })
 
           setOrders(mapped)
+          setRawSales(sales)
           // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (e: unknown) {
           if (!controller.signal.aborted) setOrders([])
@@ -249,7 +252,7 @@ export default function OrderHistoryPage() {
           </div>
 
           <div className="md:max-w-6xl md:mx-auto md:px-4 space-y-3 md:space-y-4 pb-6">
-            {filteredOrders.map((order) => <OrderCard key={order.id} order={order} />)}
+            {filteredOrders.map((order) => <OrderCard key={order.id} order={order} saleData={rawSales.find((s) => s.id === order.id)} />)}
           </div>
 
           {filteredOrders.length === 0 && (

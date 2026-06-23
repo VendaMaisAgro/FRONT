@@ -17,8 +17,7 @@ export async function GET(
 	try {
 		const cleanId = id.trim();
 		const url = `${process.env.API_URL}/products/${cleanId}`;
-		console.log(`[GET Debug] Fetching: ${url} (Original ID: "${id}")`);
-
+		
 		const res = await fetch(url, {
 			method: "GET",
 			headers: {
@@ -62,7 +61,6 @@ export async function PUT(
 		} else {
 			// É JSON (sem imagens)
 			const productData = await req.json();
-			console.log(JSON.stringify(productData));
 			headers["Content-type"] = "application/json";
 			body = JSON.stringify(productData);
 		}

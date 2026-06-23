@@ -8,8 +8,7 @@ import Link from "next/link";
 
 export default async function Home() {
 	const products = await getAll();
-	console.log('🚀 -> products:', products);
-
+	
 	return (
 		<>
 			<Navbar />
