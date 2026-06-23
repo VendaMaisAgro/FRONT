@@ -55,6 +55,9 @@ export interface PreCheckoutData {
     seller?: { name?: string; cpf?: string; cnpj?: string; address?: string; role?: string };
     products?: Array<{ name: string; variety?: string; harvestAt?: string; amount: number; unit: string; unitPrice: number }>;
     paymentMethod?: string;
+    packagingType?: string;
+    plannedPickupDate?: string;
+    plannedDeliveryDate?: string;
     total?: number;
 }
 
@@ -176,8 +179,8 @@ export default function ContractTemplate({
     const harvestInput = isoToInput(rawHarvestIso);
 
     // ── Editable dates (seller-edit only) ──────────────────────────────────
-    const rawPickup   = isoToInput(data?.conditions?.plannedPickupDate ?? data?.conditions?.pickupDate ?? (saleData as Record<string, unknown>)?.plannedPickupDate as string | undefined);
-    const rawDelivery = isoToInput(data?.conditions?.plannedDeliveryDate ?? data?.conditions?.deliveryDate ?? (saleData as Record<string, unknown>)?.plannedDeliveryDate as string | undefined);
+    const rawPickup   = isoToInput(preCheckoutData?.plannedPickupDate ?? data?.conditions?.plannedPickupDate ?? data?.conditions?.pickupDate ?? (saleData as Record<string, unknown>)?.plannedPickupDate as string | undefined);
+    const rawDelivery = isoToInput(preCheckoutData?.plannedDeliveryDate ?? data?.conditions?.plannedDeliveryDate ?? data?.conditions?.deliveryDate ?? (saleData as Record<string, unknown>)?.plannedDeliveryDate as string | undefined);
     const rawActual   = isoToInput(data?.conditions?.actualDeliveryDate ?? saleData?.actualDeliveryDate);
 
     const [harvestDate,    setHarvestDate]    = useState(harvestInput);
@@ -249,7 +252,7 @@ export default function ContractTemplate({
                             placeholder="Ex: Caixa, Saco, Granel..."
                             className={inlineInput}
                         />
-                    ) : val(extPackagingType ?? data?.conditions?.packagingType ?? saleData?.packagingType)}
+                    ) : val(extPackagingType ?? data?.conditions?.packagingType ?? preCheckoutData?.packagingType ?? saleData?.packagingType)}
                 </p>
                 <p>
                     <strong>Perfil do Vendedor:</strong>{" "}

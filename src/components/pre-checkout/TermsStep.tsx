@@ -45,7 +45,6 @@ export default function TermsStep() {
     const [sellerDetail, setSellerDetail] = useState<SellerDetail | null>(null);
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
 
-    const [packagingType, setPackagingType] = useState("");
     const [plannedPickupDate, setPlannedPickupDate] = useState("");
     const [plannedDeliveryDate, setPlannedDeliveryDate] = useState("");
 
@@ -53,7 +52,6 @@ export default function TermsStep() {
         getSellers,
         orderValue,
         getProducts,
-        setPackagingType: storeSetPackagingType,
         setContractSnapshot,
     } = useCheckoutStore();
     const sellers = getSellers();
@@ -153,7 +151,6 @@ export default function TermsStep() {
                 amount:    p.amount,
                 unit:      p.unit,
                 unitPrice: p.unitPrice,
-                packagingType: packagingType || undefined,
             })),
             conditions: {
                 paymentMethod:       payment?.method,
@@ -164,7 +161,7 @@ export default function TermsStep() {
             },
         });
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [buyer, sellerDetail, productDetails, packagingType, plannedPickupDate, plannedDeliveryDate, payment?.method, total]);
+    }, [buyer, sellerDetail, productDetails, plannedPickupDate, plannedDeliveryDate, payment?.method, total]);
 
     const preCheckoutData = {
         buyer: {
@@ -234,7 +231,11 @@ export default function TermsStep() {
                             <button
                                 type="button"
                                 onClick={() => {
-                                    sessionStorage.setItem("contractPreviewData", JSON.stringify(preCheckoutData));
+                                    sessionStorage.setItem("contractPreviewData", JSON.stringify({
+                                        ...preCheckoutData,
+                                        plannedPickupDate:   plannedPickupDate   || undefined,
+                                        plannedDeliveryDate: plannedDeliveryDate || undefined,
+                                    }));
                                     window.open("/contrato/preview", "_blank");
                                 }}
                                 className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 underline text-sm"

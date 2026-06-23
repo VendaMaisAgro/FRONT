@@ -89,7 +89,7 @@ export const useCheckoutStore = create<CheckoutState>((set, get) => ({
 		const { data } = get();
 		return data ? data.products : [];
 	},
-	setCheckoutData: (data) => set(() => ({ data: data || [] })),
+	setCheckoutData: (data) => set(() => ({ data: data ?? null })),
 	setPackagingType: (type) => set(() => ({ packagingType: type })),
 	setContractSnapshot: (snapshot) => set(() => ({ contractSnapshot: snapshot })),
 }));

@@ -66,7 +66,8 @@ export async function acceptContract(payload: ContractAcceptPayload): Promise<{ 
     const token = cookieStore.get("session")?.value;
     const { jwt } = await verifySession(token);
 
-    const res = await fetch(`${API_URI}/api/contrato/accept`, {
+    // Call backend directly (server-to-server) to avoid cookie forwarding issues
+    const res = await fetch(`${API_URL}/contract/accept`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${jwt}`,

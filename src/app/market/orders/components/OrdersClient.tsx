@@ -559,7 +559,7 @@ export default function OrdersClient() {
 										) : (
 											<ContractTemplate
 												key={`${pendingAcceptOrderId}-${plannedHarvestDate}-${plannedPickupDate}-${plannedDeliveryDate}`}
-												mode="seller-edit"
+												mode="read-only"
 												saleData={rawSales.find(s => s.id === pendingAcceptOrderId)}
 												data={{
 													...(acceptanceContractData ?? {}),
