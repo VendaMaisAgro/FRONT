@@ -136,24 +136,25 @@ export default function OrdersClient() {
 	const [acceptanceContractLoading, setAcceptanceContractLoading] = useState(false);
 
 	// Carregar dados do backend
-	useEffect(() => {
-		async function loadSalesData() {
-			try {
-				setLoading(true);
-				setError(null);
-				const salesData = await getSalesData();
-				const transformedOrders = salesData.sales.map(transformSaleDataToOrder);
-				setOrders(transformedOrders);
-				setRawSales(salesData.sales);
-			} catch (err) {
-				console.error("Erro ao carregar dados de vendas:", err);
-				setError("Erro ao carregar dados de vendas");
-			} finally {
-				setLoading(false);
-			}
+	async function loadSalesData(showLoading = true) {
+		try {
+			if (showLoading) setLoading(true);
+			setError(null);
+			const salesData = await getSalesData();
+			const transformedOrders = salesData.sales.map(transformSaleDataToOrder);
+			setOrders(transformedOrders);
+			setRawSales(salesData.sales);
+		} catch (err) {
+			console.error("Erro ao carregar dados de vendas:", err);
+			setError("Erro ao carregar dados de vendas");
+		} finally {
+			if (showLoading) setLoading(false);
 		}
+	}
 
+	useEffect(() => {
 		loadSalesData();
+	// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, []);
 
 	const filtered = useMemo(() => {
@@ -334,14 +335,8 @@ export default function OrdersClient() {
 			// 3) Atualiza status para "Em processamento"
 			await updateSaleStatus(pendingAcceptOrderId, reverseStatusMap["processing"]);
 
-			// 4) Reflete no estado local
-			setOrders((prev) =>
-				prev.map((o) =>
-					o.id === pendingAcceptOrderId
-						? { ...o, action: "accepted", status: "processing" }
-						: o
-				)
-			);
+			// 4) Recarrega do backend para refletir datas e snapshot do contrato
+			await loadSalesData(false);
 		} catch {
 			setAcceptDateError("Erro ao confirmar pedido. Tente novamente.");
 		} finally {
@@ -353,9 +348,7 @@ export default function OrdersClient() {
 
 	async function handleRejectOrder(orderId: string) {
 		await updateSellerDecision(orderId, false);
-		setOrders((prev) =>
-			prev.map((o) => (o.id === orderId ? { ...o, action: "rejected" } : o))
-		);
+		await loadSalesData(false);
 	}
 
 	if (loading) {
