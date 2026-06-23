@@ -47,11 +47,9 @@ export default function CardPayment({ saleId, paymentMethodId, amount, email, on
 
     // Inicializar Mercado Pago
     const initMercadoPago = () => {
-        console.log("Mercado Pago Script Loaded");
         if (window.MercadoPago) {
             const publicKey = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY;
-            console.log("Public Key configurada:", !!publicKey);
-
+            
             if (!publicKey) {
                 setError("Chave pública do Mercado Pago não configurada (NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY).");
                 return;

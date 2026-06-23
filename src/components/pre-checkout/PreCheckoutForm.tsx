@@ -14,6 +14,7 @@ import ReviewStep from './ReviewStep';
 import TermsStep from './TermsStep';
 import TransportStep from './TransportStep';
 import { createNewOrder } from '@/actions/order';
+import { acceptContract } from '@/actions/contract';
 import { toast } from 'sonner';
 import TanstackProvider from '@/providers/tanstackProvider';
 import { useRouter } from 'next/navigation';
@@ -31,7 +32,7 @@ export default function PreCheckoutForm({
 }: IPreCheckoutFormProps) {
 	const form = useFormContext<PreCheckoutFormType>();
 	const { trigger, control, handleSubmit } = form;
-	const { getSellers, getProducts, packagingType } = useCheckoutStore();
+	const { getSellers, getProducts, packagingType, contractSnapshot } = useCheckoutStore();
 	const sellers = getSellers();
 	const router = useRouter();
 	const [addressError, setAddressError] = useState(false);
@@ -42,7 +43,7 @@ export default function PreCheckoutForm({
 		const payload = {
 			transportTypeId: values.transport[0].transportTypeId,
 			addressId: null,
-			transportValue: 0, //! era pro back cuidar disso lol
+			transportValue: 0,
 			paymentMethodId: values.payment.methodId,
 			packagingType: packagingType || undefined,
 			boughtProducts: products.map((p) => ({
@@ -55,6 +56,12 @@ export default function PreCheckoutForm({
 		const res = await createNewOrder(payload);
 
 		if (res.success) {
+			// Persist the accepted contract snapshot to the backend
+			if (res.orderId) {
+				await acceptContract({ saleId: res.orderId, ...contractSnapshot }).catch(
+					(err) => console.error("[acceptContract]", err)
+				);
+			}
 			toast.success(res.message);
 			router.push('/market/history');
 			return;

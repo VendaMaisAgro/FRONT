@@ -191,9 +191,12 @@ export type Order = {
 	description?: string;
 	value: number; // in BRL
 	payment: string;
+	paymentCompleted?: boolean;
 	status: OrderStatus;
 	action?: OrderAction; // Nova propriedade para controlar se foi aceito/recusado
 	cargoWeightKg?: string; // Peso da carga em kg
+	createdAt?: string;
+	decisionAt?: string; // data de aceite ou recusa pelo vendedor
 };
 
 // Tipos para a API de vendas
@@ -211,6 +214,7 @@ export type SaleProduct = {
 	category: string;
 	variety: string;
 	description: string;
+	harvestAt?: string | null;
 	images_Path: string[];
 	productRating: number;
 	sellerId: string;
@@ -219,6 +223,8 @@ export type SaleProduct = {
 		name: string;
 		email: string;
 		phone_number: string;
+		cpf?: string | null;
+		cnpj?: string | null;
 	};
 };
 
@@ -273,8 +279,11 @@ export type SaleData = {
 	id: string;
 	transportTypeId: string;
 	createdAt: string;
+	updatedAt?: string;
+	sellerApprovedAt?: string;
 	shippedAt: string;
 	arrivedAt: string;
+	actualDeliveryDate?: string;
 	transportValue: number;
 	productRating: number;
 	sellerRating: number;
