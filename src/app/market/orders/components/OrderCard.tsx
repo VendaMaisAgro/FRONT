@@ -36,12 +36,15 @@ import { getContractView } from "@/actions/contract";
 export function OrderCard({
   order,
   saleData,
+  acceptedConditions,
   onChangeStatus,
   onAccept,
   onReject
 }: {
   order: Order;
   saleData?: SaleData;
+  /** Conditions aceitas pelo vendedor nesta sessão — sobrescreve o cache do backend */
+  acceptedConditions?: Record<string, unknown>;
   onChangeStatus: () => void;
   onAccept: () => void;
   onReject: () => void;
@@ -95,7 +98,19 @@ export function OrderCard({
       const productId = saleData?.boughtProducts?.[0]?.productId;
       const { contract, ok, error } = await getContractView(order.id, productId);
       if (!ok) throw new Error(error ?? "Erro ao carregar contrato");
-      setContractData(contract);
+      // Mescla as conditions aceitas nesta sessão sobre o retorno do backend.
+      // Isso garante que "Ver contrato" mostre os dados corretos mesmo que o
+      // backend ainda não tenha persistido o snapshot atualizado.
+      const merged = acceptedConditions
+        ? {
+            ...contract,
+            conditions: {
+              ...((contract.conditions as Record<string, unknown>) ?? {}),
+              ...acceptedConditions,
+            },
+          }
+        : contract;
+      setContractData(merged);
     } catch (e: unknown) {
       setContractError(e instanceof Error ? e.message : "Erro ao carregar contrato");
     } finally {

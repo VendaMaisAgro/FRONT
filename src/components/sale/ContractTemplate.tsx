@@ -56,6 +56,7 @@ export interface PreCheckoutData {
     products?: Array<{ name: string; variety?: string; harvestAt?: string; amount: number; unit: string; unitPrice: number }>;
     paymentMethod?: string;
     packagingType?: string;
+    plannedHarvestDate?: string;
     plannedPickupDate?: string;
     plannedDeliveryDate?: string;
     total?: number;
@@ -171,6 +172,7 @@ export default function ContractTemplate({
     // ── Resolve harvest date ───────────────────────────────────────────────
     // Final fallback: harvestAt comes from saleData.boughtProducts[0].product.harvestAt
     const rawHarvestIso =
+        preCheckoutData?.plannedHarvestDate ||
         data?.conditions?.plannedHarvestDate ||
         data?.conditions?.harvestDate ||
         effectiveItems[0]?.harvestAt ||

@@ -135,6 +135,10 @@ export default function OrdersClient() {
 	const [acceptanceContractData, setAcceptanceContractData] = useState<ContractContextData | null>(null);
 	const [acceptanceContractLoading, setAcceptanceContractLoading] = useState(false);
 
+	// Cache local das conditions aceitas pelo vendedor (saleId → conditions)
+	// Garante que "Ver contrato" mostre os dados corretos mesmo antes do backend sincronizar
+	const [acceptedConditionsMap, setAcceptedConditionsMap] = useState<Record<string, Record<string, unknown>>>({});
+
 	// Carregar dados do backend
 	async function loadSalesData(showLoading = true) {
 		try {
@@ -261,6 +265,12 @@ export default function OrdersClient() {
 		}
 	}
 
+	// Converte string ISO ou yyyy-mm-dd para o formato do input date (yyyy-mm-dd)
+	function isoToDateInput(iso: string | undefined): string {
+		if (!iso) return "";
+		return iso.substring(0, 10);
+	}
+
 	async function handleAcceptOrder(orderId: string) {
 		setPendingAcceptOrderId(orderId);
 		setTermsAccepted(false);
@@ -278,7 +288,16 @@ export default function OrdersClient() {
 			const sale = rawSales.find(s => s.id === orderId);
 			const productId = sale?.boughtProducts?.[0]?.productId;
 			const { contract, ok } = await getContractView(orderId, productId);
-			if (ok) setAcceptanceContractData(contract as ContractContextData);
+			if (ok) {
+				const ctx = contract as ContractContextData;
+				setAcceptanceContractData(ctx);
+				// Pré-preenche as datas a partir do contexto carregado
+				// para garantir consistência com o contrato exibido
+				const conds = ctx.conditions as Record<string, string | undefined> | undefined;
+				if (conds?.plannedHarvestDate)  setPlannedHarvestDate(isoToDateInput(conds.plannedHarvestDate));
+				if (conds?.plannedPickupDate)   setPlannedPickupDate(isoToDateInput(conds.plannedPickupDate));
+				if (conds?.plannedDeliveryDate) setPlannedDeliveryDate(isoToDateInput(conds.plannedDeliveryDate));
+			}
 		} catch {
 			// non-blocking: contract shows with saleData fallback
 		} finally {
@@ -316,6 +335,10 @@ export default function OrdersClient() {
 				...((acceptanceContractData?.conditions as Record<string, unknown>) ?? {}),
 				...dates,
 			};
+
+			// Guarda as conditions corretas em memória para "Ver contrato" na mesma sessão
+			setAcceptedConditionsMap(prev => ({ ...prev, [pendingAcceptOrderId]: conditions }));
+
 			const contractResult = await acceptContract({
 				saleId: pendingAcceptOrderId,
 				buyer:  acceptanceContractData?.buyer,
@@ -431,9 +454,10 @@ export default function OrdersClient() {
 			<div className="mt-6 flex flex-col gap-4">
 				{filtered.map((order) => (
 					<OrderCard
-						key={order.id}
+						key={`${order.id}-${order.action ?? "pending"}`}
 						order={order}
 						saleData={rawSales.find((s) => s.id === order.id)}
+						acceptedConditions={acceptedConditionsMap[order.id]}
 						onChangeStatus={() => openStatusDialog(order.id, order.status)}
 						onAccept={() => handleAcceptOrder(order.id)}
 						onReject={() => handleRejectOrder(order.id)}
@@ -581,27 +605,51 @@ export default function OrdersClient() {
 										type="button"
 										onClick={() => {
 											const sale = rawSales.find(s => s.id === pendingAcceptOrderId);
-											if (sale) {
-												sessionStorage.setItem("contractPreviewData", JSON.stringify({
-													seller: { name: sale.boughtProducts[0]?.product?.seller?.name },
-													buyer:  { name: sale.buyer?.name, cpf: sale.buyer?.cpf },
-													products: sale.boughtProducts.map(bp => ({
-														name: bp.product?.name,
-														variety: bp.product?.variety,
-														amount: Number(bp.amount),
-														unit: bp.sellingUnitProduct?.unit?.unit ?? bp.sellingUnitProduct?.unit?.title ?? "un",
-														unitPrice: Number(bp.amount) > 0 ? Number(bp.value) / Number(bp.amount) : Number(bp.value),
-													})),
-													paymentMethod: sale.paymentMethod?.method,
-													total: sale.boughtProducts.reduce((s, bp) => s + Number(bp.value), 0) + Number(sale.transportValue ?? 0),
+											// Monta previewData com dados completos do contexto + datas do formulário
+											// Usa sessionStorage sem ?saleId= para que o PDF reflita as datas
+											// preenchidas agora, antes do aceite ser gravado no backend
+											const items = acceptanceContractData?.items?.length
+												? acceptanceContractData.items.map(i => ({
+													name: (i.name ?? i.product) as string,
+													variety: i.variety,
+													harvestAt: i.harvestAt,
+													amount: Number(i.amount ?? i.quantity ?? 0),
+													unit: i.unit ?? "un",
+													unitPrice: Number(i.unitPrice ?? i.price ?? 0),
+												}))
+												: (sale?.boughtProducts ?? []).map(bp => ({
+													name: bp.product?.name ?? "",
+													variety: bp.product?.variety,
+													harvestAt: bp.product?.harvestAt ?? undefined,
+													amount: Number(bp.amount),
+													unit: bp.sellingUnitProduct?.unit?.unit ?? bp.sellingUnitProduct?.unit?.title ?? "un",
+													unitPrice: Number(bp.amount) > 0 ? Number(bp.value) / Number(bp.amount) : Number(bp.value),
 												}));
-											}
-											window.open(
-												pendingAcceptOrderId
-													? `/contrato/preview?saleId=${pendingAcceptOrderId}`
-													: "/contrato/preview",
-												"_blank"
-											);
+
+											const total = Number(acceptanceContractData?.conditions?.total)
+												|| (sale?.boughtProducts ?? []).reduce((s, bp) => s + Number(bp.value), 0) + Number(sale?.transportValue ?? 0);
+
+											sessionStorage.setItem("contractPreviewData", JSON.stringify({
+												seller: {
+													name:    acceptanceContractData?.seller?.name    ?? sale?.boughtProducts?.[0]?.product?.seller?.name,
+													cpf:     acceptanceContractData?.seller?.cpf,
+													cnpj:    acceptanceContractData?.seller?.cnpj,
+													address: acceptanceContractData?.seller?.address,
+													role:    acceptanceContractData?.seller?.role,
+												},
+												buyer: {
+													name: acceptanceContractData?.buyer?.name ?? sale?.buyer?.name,
+													cpf:  acceptanceContractData?.buyer?.cpf  ?? sale?.buyer?.cpf,
+													cnpj: acceptanceContractData?.buyer?.cnpj,
+												},
+												products: items,
+												paymentMethod:       acceptanceContractData?.conditions?.paymentMethod || sale?.paymentMethod?.method,
+												total,
+												plannedHarvestDate:  plannedHarvestDate  || undefined,
+												plannedPickupDate:   plannedPickupDate   || undefined,
+												plannedDeliveryDate: plannedDeliveryDate || undefined,
+											}));
+											window.open("/contrato/preview", "_blank");
 										}}
 										className="inline-flex items-center gap-2 text-green-600 hover:text-green-700 underline text-sm"
 									>
