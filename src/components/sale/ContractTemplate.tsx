@@ -29,6 +29,17 @@ function inputToDisplay(value: string): string {
     return d.toLocaleDateString("pt-BR");
 }
 
+function isoToDatetime(iso: string | null | undefined): string {
+    if (!iso) return BLANK;
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return BLANK;
+    return d.toLocaleString("pt-BR", {
+        day: "2-digit", month: "2-digit", year: "numeric",
+        hour: "2-digit", minute: "2-digit",
+        timeZone: "America/Sao_Paulo",
+    });
+}
+
 function addDays(input: string, days: number): string {
     if (!input) return "";
     const d = new Date(input + "T00:00:00");
@@ -45,7 +56,7 @@ export interface ContractContextData {
     buyer?: { name?: string; cpf?: string; cnpj?: string; doc?: string; email?: string; phone?: string; phone_number?: string };
     seller?: { name?: string; cpf?: string; cnpj?: string; doc?: string; address?: string; role?: string; email?: string };
     items?: Array<{ name?: string; product?: string; variety?: string; harvestAt?: string; amount?: number; quantity?: number; unit?: string; price?: number; unitPrice?: number; value?: number; total?: number }>;
-    conditions?: { paymentMethod?: string; payment?: string; packagingType?: string; plannedHarvestDate?: string; harvestDate?: string; plannedPickupDate?: string; pickupDate?: string; plannedDeliveryDate?: string; deliveryDate?: string; actualDeliveryDate?: string; total?: number; totalValue?: number; value?: number };
+    conditions?: { paymentMethod?: string; payment?: string; packagingType?: string; plannedHarvestDate?: string; harvestDate?: string; plannedPickupDate?: string; pickupDate?: string; plannedDeliveryDate?: string; deliveryDate?: string; actualDeliveryDate?: string; paymentConfirmedAt?: string; total?: number; totalValue?: number; value?: number };
     [key: string]: unknown;
 }
 
@@ -221,7 +232,7 @@ export default function ContractTemplate({
 
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="prose prose-sm max-w-none text-gray-700 space-y-4 text-sm leading-relaxed">
+        <div className="prose prose-sm max-w-none text-gray-700 space-y-4 text-sm leading-relaxed text-justify">
             <div className="flex justify-center pb-4 border-b border-gray-300">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/logo-venda-mais.png" alt="Venda+ Agromarket" className="h-16 object-contain" />
@@ -336,6 +347,14 @@ export default function ContractTemplate({
                         </>
                     ) : displayDelivery}
                 </p>
+
+                {/* Data de Confirmação do Pagamento — exibida apenas quando disponível */}
+                {data?.conditions?.paymentConfirmedAt && (
+                    <p>
+                        <strong>Pagamento Confirmado em:</strong>{" "}
+                        {isoToDatetime(data.conditions.paymentConfirmedAt)}
+                    </p>
+                )}
 
                 {/* Entrega efetiva — oculto no modo read-only para o comprador */}
                 {!isBuyerCheckout && !isReadOnly && (
