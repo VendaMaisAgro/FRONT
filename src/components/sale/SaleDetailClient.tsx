@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { currencyFormatter } from "@/utils/functions";
 import type { SaleData } from "@/types/types";
+import { getContractView } from "@/actions/contract";
 import {
     Package,
     User,
@@ -41,6 +42,23 @@ function formatDate(iso: string | null | undefined) {
     return d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
+function formatDatetime(iso: string | null | undefined) {
+    if (!iso) return "—";
+    const d = new Date(iso);
+    if (isNaN(d.getTime())) return "—";
+    const date = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Sao_Paulo" });
+    const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
+    return `${date}, ${time}h`;
+}
+
+type ContractConditions = {
+    plannedHarvestDate?: string;
+    plannedPickupDate?: string;
+    plannedDeliveryDate?: string;
+    paymentConfirmedAt?: string;
+    [key: string]: unknown;
+};
+
 interface Props {
     saleId: string;
     saleData?: SaleData;
@@ -51,6 +69,7 @@ export default function SaleDetailClient({ saleId, saleData: initialData, showSe
     const [sale, setSale] = useState<SaleData | null>(initialData ?? null);
     const [loading, setLoading] = useState(!initialData);
     const [error, setError] = useState<string | null>(null);
+    const [contractConditions, setContractConditions] = useState<ContractConditions | null>(null);
 
     useEffect(() => {
         if (initialData) {
@@ -82,6 +101,20 @@ export default function SaleDetailClient({ saleId, saleData: initialData, showSe
         load();
         return () => { cancelled = true; };
     }, [saleId, initialData]);
+
+    // Busca datas previstas do contexto do contrato
+    useEffect(() => {
+        if (!saleId) return;
+        let cancelled = false;
+        const productId = (initialData ?? sale)?.boughtProducts?.[0]?.productId;
+        getContractView(saleId, productId).then(({ contract, ok }) => {
+            if (ok && !cancelled) {
+                setContractConditions((contract.conditions as ContractConditions) ?? null);
+            }
+        }).catch(() => {});
+        return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [saleId]);
 
     if (loading) {
         return (
@@ -282,26 +315,37 @@ export default function SaleDetailClient({ saleId, saleData: initialData, showSe
             )}
 
             {/* Datas */}
-            {(sale.shippedAt || sale.arrivedAt || sale.actualDeliveryDate) && (
-                <Card className="shadow-none border-gray-100">
-                    <CardHeader className="pb-2 pt-4 px-4">
-                        <CardTitle className="text-sm font-semibold flex items-center gap-2">
-                            <Calendar className="w-4 h-4 text-green-600" /> Datas
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent className="px-4 pb-4 text-sm space-y-1">
-                        {sale.shippedAt && (
-                            <p><span className="text-gray-500">Enviado em:</span> <span className="font-medium">{formatDate(sale.shippedAt)}</span></p>
-                        )}
-                        {sale.arrivedAt && (
-                            <p><span className="text-gray-500">Chegada prevista:</span> <span className="font-medium">{formatDate(sale.arrivedAt)}</span></p>
-                        )}
-                        {sale.actualDeliveryDate && (
-                            <p><span className="text-gray-500">Entrega efetiva:</span> <span className="font-medium">{formatDate(sale.actualDeliveryDate)}</span></p>
-                        )}
-                    </CardContent>
-                </Card>
-            )}
+            <Card className="shadow-none border-gray-100">
+                <CardHeader className="pb-2 pt-4 px-4">
+                    <CardTitle className="text-sm font-semibold flex items-center gap-2">
+                        <Calendar className="w-4 h-4 text-green-600" /> Datas
+                    </CardTitle>
+                </CardHeader>
+                <CardContent className="px-4 pb-4 text-sm space-y-1">
+                    <p><span className="text-gray-500">Pedido realizado:</span> <span className="font-medium">{formatDatetime(sale.createdAt)}</span></p>
+                    {contractConditions?.paymentConfirmedAt && (
+                        <p><span className="text-gray-500">Pagamento confirmado:</span> <span className="font-medium">{formatDatetime(contractConditions.paymentConfirmedAt)}</span></p>
+                    )}
+                    {contractConditions?.plannedHarvestDate && (
+                        <p><span className="text-gray-500">Previsão Colheita/Disponibilização:</span> <span className="font-medium">{formatDate(contractConditions.plannedHarvestDate)}</span></p>
+                    )}
+                    {contractConditions?.plannedPickupDate && (
+                        <p><span className="text-gray-500">Previsão Retirada/Embarque:</span> <span className="font-medium">{formatDate(contractConditions.plannedPickupDate)}</span></p>
+                    )}
+                    {contractConditions?.plannedDeliveryDate && (
+                        <p><span className="text-gray-500">Previsão Entrega no Destino:</span> <span className="font-medium">{formatDate(contractConditions.plannedDeliveryDate)}</span></p>
+                    )}
+                    {sale.shippedAt && (
+                        <p><span className="text-gray-500">Enviado em:</span> <span className="font-medium">{formatDate(sale.shippedAt)}</span></p>
+                    )}
+                    {sale.arrivedAt && (
+                        <p><span className="text-gray-500">Chegada prevista:</span> <span className="font-medium">{formatDate(sale.arrivedAt)}</span></p>
+                    )}
+                    {sale.actualDeliveryDate && (
+                        <p><span className="text-gray-500">Entrega efetiva:</span> <span className="font-medium">{formatDate(sale.actualDeliveryDate)}</span></p>
+                    )}
+                </CardContent>
+            </Card>
 
             {/* Resumo financeiro */}
             <Card className="shadow-none border-gray-100">
