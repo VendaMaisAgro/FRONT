@@ -48,7 +48,7 @@ function formatDatetime(iso: string | null | undefined) {
     if (isNaN(d.getTime())) return "—";
     const date = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Sao_Paulo" });
     const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
-    return `${date}, horário ${time}`;
+    return `${date}, ${time}h`;
 }
 
 type ContractConditions = {

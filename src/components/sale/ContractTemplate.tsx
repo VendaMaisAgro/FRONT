@@ -35,7 +35,7 @@ function isoToDatetime(iso: string | null | undefined): string {
     if (isNaN(d.getTime())) return BLANK;
     const date = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Sao_Paulo" });
     const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
-    return `${date}, horário ${time}`;
+    return `${date}, ${time}h`;
 }
 
 function addDays(input: string, days: number): string {
