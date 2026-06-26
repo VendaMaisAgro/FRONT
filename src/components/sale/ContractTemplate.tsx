@@ -33,11 +33,9 @@ function isoToDatetime(iso: string | null | undefined): string {
     if (!iso) return BLANK;
     const d = new Date(iso);
     if (isNaN(d.getTime())) return BLANK;
-    return d.toLocaleString("pt-BR", {
-        day: "2-digit", month: "2-digit", year: "numeric",
-        hour: "2-digit", minute: "2-digit",
-        timeZone: "America/Sao_Paulo",
-    });
+    const date = d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", timeZone: "America/Sao_Paulo" });
+    const time = d.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" });
+    return `${date}, horário ${time}`;
 }
 
 function addDays(input: string, days: number): string {
@@ -227,7 +225,7 @@ export default function ContractTemplate({
 
     // ── Contract number ────────────────────────────────────────────────────
     const contractNumber = data?.contractNumber ?? saleData?.orderNumber;
-    const today = data?.emissionDate ? inputToDisplay(isoToInput(data.emissionDate)) : (saleData?.createdAt ? inputToDisplay(isoToInput(saleData.createdAt)) : new Date().toLocaleDateString("pt-BR"));
+    const today = isoToDatetime(data?.emissionDate ?? saleData?.createdAt ?? new Date().toISOString());
     const totalDisplay = totalValue ? money(parseFloat(totalValue.replace(",", "."))) : BLANK;
 
     // ─────────────────────────────────────────────────────────────────────────
