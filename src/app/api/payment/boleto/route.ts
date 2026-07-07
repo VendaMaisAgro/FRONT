@@ -6,8 +6,10 @@ import * as z from "zod";
 const boletoSchema = z.object({
     saleId: z.string().uuid(),
     paymentMethodId: z.string(),
-    amount: z.number().positive(),
+    // Para phase down_payment o backend calcula o valor correto e ignora este campo
+    amount: z.number().positive().optional(),
     expirationDays: z.number().min(1).max(30).optional(),
+    phase: z.enum(["down_payment", "final_payment", "full"]).optional(),
 });
 
 async function auth() {

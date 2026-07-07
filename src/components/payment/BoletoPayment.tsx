@@ -11,9 +11,10 @@ import { useRouter } from "next/navigation";
 interface BoletoPaymentProps {
     paymentData: BoletoPaymentResponse;
     onSuccess?: () => void;
+    phase?: string;
 }
 
-export default function BoletoPayment({ paymentData, onSuccess }: BoletoPaymentProps) {
+export default function BoletoPayment({ paymentData, onSuccess, phase }: BoletoPaymentProps) {
     const router = useRouter();
     const [status, setStatus] = useState<string>(paymentData.payment.status);
     const [cancelling, setCancelling] = useState(false);
@@ -99,6 +100,7 @@ export default function BoletoPayment({ paymentData, onSuccess }: BoletoPaymentP
     };
 
     if (status === "completed") {
+        const isDownPayment = phase === "down_payment";
         return (
             <Card className="border-green-200 bg-green-50">
                 <CardContent className="pt-6 flex flex-col items-center text-center space-y-4">
@@ -106,8 +108,19 @@ export default function BoletoPayment({ paymentData, onSuccess }: BoletoPaymentP
                         <CheckCircle className="h-8 w-8 text-green-600" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-green-800">Pagamento Confirmado!</h3>
-                        <p className="text-green-700">Seu pedido está sendo processado.</p>
+                        <h3 className="text-xl font-bold text-green-800">
+                            {isDownPayment ? "Entrada Confirmada!" : "Pagamento Confirmado!"}
+                        </h3>
+                        <p className="text-green-700">
+                            {isDownPayment
+                                ? "Pagamento de entrada (30%) recebido. O vendedor será notificado para autorizar a colheita."
+                                : "Seu pedido está sendo processado."}
+                        </p>
+                        {isDownPayment && (
+                            <p className="text-sm text-green-600 mt-2">
+                                Após o registro da pesagem pelo vendedor, o pagamento do saldo (70%) será liberado.
+                            </p>
+                        )}
                     </div>
                     <Button
                         onClick={() => router.push("/market/history")}

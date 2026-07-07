@@ -59,20 +59,34 @@ export default function OrderHistoryPage() {
             let statusLabel = 'Aguardando confirmação'
 
             // Mapping backend status to frontend status and label
-            if (s.sellerApproved === false || s.status === 'Recusado pelo vendedor') {
+            if (s.sellerApproved === false || s.status === 'Recusado pelo vendedor' || s.status === 'Cancelado') {
               status = 'rejected'
               statusLabel = 'Pedido recusado'
             } else if (s.arrivedAt || s.status === 'Concluído') {
               status = 'completed'
               statusLabel = 'Pedido concluído'
-            } else if (s.status === 'Disponível para retirada') {
+            } else if (s.status === 'Disponível para entrega' || s.status === 'Disponível para retirada') {
               status = 'ready'
-              statusLabel = 'Pronto para retirada'
+              statusLabel = 'Disponível para entrega'
+            } else if (s.status === 'Aguardando pagamento final') {
+              status = 'preparing'
+              statusLabel = 'Aguardando pagamento final (70%)'
+            } else if (s.status === 'Em pesagem') {
+              status = 'preparing'
+              statusLabel = 'Em pesagem pelo vendedor'
+            } else if (s.status === 'Colheita concluída') {
+              status = 'preparing'
+              statusLabel = 'Colheita concluída'
+            } else if (s.status === 'Colheita autorizada') {
+              status = 'preparing'
+              statusLabel = 'Colheita autorizada'
+            } else if (s.status === 'Entrada confirmada' || s.status === 'Entrada confirmada - aguardando colheita' || (s.sellerApproved === true && (s.firstInstallmentPaid ?? s.downPaymentCompleted) && !(s.finalPaymentPaid ?? s.paymentCompleted))) {
+              status = 'preparing'
+              statusLabel = 'Entrada confirmada — aguardando colheita'
             } else if (s.sellerApproved === true) {
               status = 'preparing'
               statusLabel = 'Em preparação'
             } else {
-              // Default case: sellerApproved === null (or undefined)
               status = 'waiting'
               statusLabel = 'Aguardando confirmação'
             }
@@ -89,7 +103,7 @@ export default function OrderHistoryPage() {
               statusLabel,
               items,
               vendorLabel,
-              paymentCompleted: s.paymentCompleted ?? false,
+              paymentCompleted: s.finalPaymentPaid ?? s.paymentCompleted ?? false,
               paymentMethodId: s.paymentMethodId,
               sellerApproved: s.sellerApproved ?? null
             }

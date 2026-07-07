@@ -3,14 +3,10 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import * as z from "zod";
 
-const pixSchema = z.object({
+const schema = z.object({
     saleId: z.string().uuid(),
-    paymentMethodId: z.string(),
-    // Para phase down_payment o backend calcula o valor correto e ignora este campo
+    paymentMethodId: z.string().min(1),
     amount: z.number().positive().optional(),
-    email: z.string().email(),
-    expirationMinutes: z.number().optional(),
-    phase: z.enum(["down_payment", "final_payment", "full"]).optional(),
 });
 
 async function auth() {
@@ -27,17 +23,12 @@ export async function POST(req: NextRequest) {
         if (error) return error;
 
         const body = await req.json();
-
-        // Validar dados
-        const validation = pixSchema.safeParse(body);
+        const validation = schema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json(
-                { error: "Dados inválidos", details: validation.error.format() },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "Dados inválidos", details: validation.error.format() }, { status: 400 });
         }
 
-        const res = await fetch(`${process.env.API_URL}/payment/pix`, {
+        const res = await fetch(`${process.env.API_URL}/payment-methods/final-boleto`, {
             method: "POST",
             headers: {
                 Authorization: `Bearer ${jwt}`,
@@ -46,22 +37,28 @@ export async function POST(req: NextRequest) {
             body: JSON.stringify(body),
         });
 
+        const contentType = res.headers.get("content-type") ?? "";
+        if (!contentType.includes("application/json")) {
+            const text = await res.text();
+            console.error("[FINAL BOLETO POST] Resposta não-JSON:", res.status, text.substring(0, 200));
+            return NextResponse.json(
+                { error: `Endpoint não disponível no backend (HTTP ${res.status})` },
+                { status: res.ok ? 502 : res.status }
+            );
+        }
+
         const data = await res.json();
 
         if (!res.ok) {
-            const errorMessage = data.message || data.error || "Erro ao criar pagamento PIX";
             return NextResponse.json(
-                { error: errorMessage },
+                { error: data.message || data.error || "Erro ao gerar boleto final" },
                 { status: res.status }
             );
         }
 
         return NextResponse.json(data, { status: res.status });
     } catch (e) {
-        console.error("[PAYMENT PIX POST]", e);
-        return NextResponse.json(
-            { error: "Erro interno ao criar pagamento PIX" },
-            { status: 500 }
-        );
+        console.error("[FINAL BOLETO POST]", e);
+        return NextResponse.json({ error: "Erro interno ao gerar boleto final" }, { status: 500 });
     }
 }

@@ -3,15 +3,7 @@ import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 import * as z from "zod";
 
-const pixSchema = z.object({
-    saleId: z.string().uuid(),
-    paymentMethodId: z.string(),
-    // Para phase down_payment o backend calcula o valor correto e ignora este campo
-    amount: z.number().positive().optional(),
-    email: z.string().email(),
-    expirationMinutes: z.number().optional(),
-    phase: z.enum(["down_payment", "final_payment", "full"]).optional(),
-});
+const schema = z.object({ paymentMethodId: z.string().min(1) });
 
 async function auth() {
     const token = (await cookies()).get("session")?.value;
@@ -21,24 +13,24 @@ async function auth() {
     return { jwt: session?.jwt as string | undefined };
 }
 
-export async function POST(req: NextRequest) {
+export async function PATCH(
+    req: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
+) {
     try {
         const { jwt, error } = await auth();
         if (error) return error;
 
+        const { id } = await params;
         const body = await req.json();
 
-        // Validar dados
-        const validation = pixSchema.safeParse(body);
+        const validation = schema.safeParse(body);
         if (!validation.success) {
-            return NextResponse.json(
-                { error: "Dados inválidos", details: validation.error.format() },
-                { status: 400 }
-            );
+            return NextResponse.json({ error: "Dados inválidos" }, { status: 400 });
         }
 
-        const res = await fetch(`${process.env.API_URL}/payment/pix`, {
-            method: "POST",
+        const res = await fetch(`${process.env.API_URL}/sales/${id}/payment-method`, {
+            method: "PATCH",
             headers: {
                 Authorization: `Bearer ${jwt}`,
                 "Content-Type": "application/json",
@@ -49,19 +41,18 @@ export async function POST(req: NextRequest) {
         const data = await res.json();
 
         if (!res.ok) {
-            const errorMessage = data.message || data.error || "Erro ao criar pagamento PIX";
             return NextResponse.json(
-                { error: errorMessage },
+                {
+                    error: data.message || data.error || "Erro ao alterar método de pagamento",
+                    code: data.code,
+                },
                 { status: res.status }
             );
         }
 
         return NextResponse.json(data, { status: res.status });
     } catch (e) {
-        console.error("[PAYMENT PIX POST]", e);
-        return NextResponse.json(
-            { error: "Erro interno ao criar pagamento PIX" },
-            { status: 500 }
-        );
+        console.error("[PAYMENT METHOD PATCH]", e);
+        return NextResponse.json({ error: "Erro interno ao alterar método de pagamento" }, { status: 500 });
     }
 }

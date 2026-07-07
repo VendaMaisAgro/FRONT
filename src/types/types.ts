@@ -179,7 +179,17 @@ export type PaymentMethodsData = {
 	method: string;
 };
 
-export type OrderStatus = 'new' | 'processing' | 'pickup' | 'completed';
+export type OrderStatus =
+    | 'new'                      // Pedido realizado
+    | 'processing'               // Em processamento (após aceite)
+    | 'down_payment_confirmed'   // Entrada (30%) confirmada — aguardando autorização de colheita
+    | 'harvest_authorized'       // Colheita autorizada pelo vendedor
+    | 'harvest_completed'        // Colheita concluída
+    | 'weighing'                 // Em pesagem
+    | 'awaiting_final_payment'   // Aguardando pagamento final (70%)
+    | 'pickup'                   // Disponível para entrega
+    | 'completed'                // Concluído
+    | 'cancelled';               // Cancelado
 
 export type OrderAction = 'accepted' | 'rejected' | null;
 
@@ -297,6 +307,14 @@ export type SaleData = {
 	 * true = aceito, false = recusado, null = pendente
 	 */
 	sellerApproved?: boolean | null;
+	/** true quando a entrada de 30% foi confirmada pelo webhook */
+	downPaymentCompleted?: boolean;
+	/** Calculado pelo backend: true se 30% pago (resiliente a webhook miss) */
+	firstInstallmentPaid?: boolean;
+	/** Calculado pelo backend: true se pagamento final confirmado (resiliente a webhook miss) */
+	finalPaymentPaid?: boolean;
+	/** ID do documento de comprovante de pesagem da balança */
+	weightDocumentId?: string | null;
 	cargoWeightKg?: string;
 	orderNumber?: number;
 	packagingType?: string | null;

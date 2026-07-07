@@ -54,17 +54,64 @@ import { StatCard } from "./StatCard";
 const statusMap: Record<string, OrderStatus> = {
 	"Pedido realizado!": "new",
 	"Em processamento": "processing",
+	"Entrada confirmada": "down_payment_confirmed",
+	"Entrada confirmada - aguardando colheita": "down_payment_confirmed",
+	"Colheita autorizada": "harvest_authorized",
+	"Colheita concluída": "harvest_completed",
+	"Em pesagem": "weighing",
+	"Aguardando pagamento final": "awaiting_final_payment",
 	"Disponível para retirada": "pickup",
+	"Disponível para entrega": "pickup",
 	Concluído: "completed",
+	Cancelado: "cancelled",
 };
 
-// Mapeamento reverso: status do componente para status da API
 const reverseStatusMap: Record<OrderStatus, string> = {
 	new: "Pedido realizado!",
 	processing: "Em processamento",
-	pickup: "Disponível para retirada",
+	down_payment_confirmed: "Entrada confirmada",
+	harvest_authorized: "Colheita autorizada",
+	harvest_completed: "Colheita concluída",
+	weighing: "Em pesagem",
+	awaiting_final_payment: "Aguardando pagamento final",
+	pickup: "Disponível para entrega",
 	completed: "Concluído",
+	cancelled: "Cancelado",
 };
+
+type StatusOption = { value: OrderStatus; label: string; disabled?: boolean; hint?: string };
+
+function getAvailableNextStatuses(current: OrderStatus, sale?: SaleData): StatusOption[] {
+	const downPaid = sale?.firstInstallmentPaid ?? sale?.downPaymentCompleted ?? false;
+	const finalPaid = sale?.finalPaymentPaid ?? sale?.paymentCompleted ?? false;
+
+	switch (current) {
+		case "new":
+		case "processing":
+		case "down_payment_confirmed":
+			return [{
+				value: "harvest_authorized",
+				label: "Colheita autorizada",
+				disabled: !downPaid,
+				hint: !downPaid ? "Aguardando confirmação do pagamento da entrada (30%)" : undefined,
+			}];
+		case "harvest_authorized":
+			return [{ value: "harvest_completed", label: "Colheita concluída" }];
+		case "harvest_completed":
+			return [{ value: "weighing", label: "Em pesagem" }];
+		case "awaiting_final_payment":
+			return [{
+				value: "pickup",
+				label: "Disponível para entrega",
+				disabled: !finalPaid,
+				hint: !finalPaid ? "Aguardando confirmação do pagamento final (70%)" : undefined,
+			}];
+		case "pickup":
+			return [{ value: "completed", label: "Concluído" }];
+		default:
+			return [];
+	}
+}
 
 // Função para transformar dados da API em formato de Order
 function transformSaleDataToOrder(sale: SaleData): Order {
@@ -89,7 +136,7 @@ function transformSaleDataToOrder(sale: SaleData): Order {
 		product: productsString || "—",
 		value: totalValue,
 		payment: sale.paymentMethod?.method ?? "",
-		paymentCompleted: sale.paymentCompleted,
+		paymentCompleted: sale.finalPaymentPaid ?? sale.paymentCompleted,
 		status: statusMap[sale.status] || "new",
 		action:
 			sale.sellerApproved === true
@@ -115,7 +162,6 @@ export default function OrdersClient() {
 	const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
 	const [nextStatus, setNextStatus] = useState<OrderStatus>("processing");
 	const [updateError, setUpdateError] = useState<string | null>(null);
-	const [cargoWeight, setCargoWeight] = useState<string>("");
 	const [isUpdating, setIsUpdating] = useState(false);
 	const [isAccepting, setIsAccepting] = useState(false);
 
@@ -168,58 +214,35 @@ export default function OrdersClient() {
 	}, [orders, query]);
 
 	const counters = useMemo(() => {
-		const base = { new: 0, processing: 0, pickup: 0, completed: 0 } as Record<
-			OrderStatus,
-			number
-		>;
+		const result = { new: 0, active: 0, awaitingPayment: 0, done: 0 };
 		for (const o of orders) {
-			if (o.action !== 'rejected') {
-				base[o.status]++;
-			}
+			if (o.action === "rejected") continue;
+			if (o.status === "new") result.new++;
+			else if (["processing", "down_payment_confirmed", "harvest_authorized", "harvest_completed", "weighing"].includes(o.status)) result.active++;
+			else if (o.status === "awaiting_final_payment") result.awaitingPayment++;
+			else if (["pickup", "completed"].includes(o.status)) result.done++;
 		}
-		return base;
+		return result;
 	}, [orders]);
 
 	function openStatusDialog(orderId: string, current: OrderStatus) {
 		setSelectedOrderId(orderId);
-
-		// Se o status atual for "new", definir como "processing" por padrão
-		// caso contrário, usar o status atual
-		setNextStatus(current === "new" ? "processing" : current);
-
-		// Pré-preencher o peso da carga com o valor atual do pedido
-		const order = orders.find(o => o.id === orderId);
-		setCargoWeight(order?.cargoWeightKg || "");
-
-		// Limpar erro anterior
+		const sale = rawSales.find(s => s.id === orderId);
+		const available = getAvailableNextStatuses(current, sale);
+		const firstEnabled = available.find(s => !s.disabled) ?? available[0];
+		setNextStatus(firstEnabled?.value ?? current);
 		setUpdateError(null);
-
 		setDialogOpen(true);
 	}
 
 	async function confirmStatusChange() {
 		if (selectedOrderId == null) return;
 
-		if (nextStatus === "pickup") {
-			if (!cargoWeight.trim()) {
-				setUpdateError("Por favor, informe o peso da carga.");
-				return;
-			}
-			const weightValue = parseFloat(cargoWeight);
-			if (isNaN(weightValue) || weightValue <= 0) {
-				setUpdateError("O peso da carga deve ser maior que zero.");
-				return;
-			}
-		}
-
 		try {
 			setIsUpdating(true);
 			setUpdateError(null);
 
 			const body: Record<string, unknown> = { status: reverseStatusMap[nextStatus] };
-			if (nextStatus === "pickup" && cargoWeight.trim()) {
-				body.cargoWeightKg = cargoWeight;
-			}
 
 			const response = await fetch(`/api/sales/${selectedOrderId}`, {
 				method: "PUT",
@@ -251,9 +274,7 @@ export default function OrdersClient() {
 
 			setOrders((prev) =>
 				prev.map((o) =>
-					o.id === selectedOrderId
-						? { ...o, status: nextStatus, cargoWeightKg: nextStatus === "pickup" ? cargoWeight : o.cargoWeightKg }
-						: o
+					o.id === selectedOrderId ? { ...o, status: nextStatus } : o
 				)
 			);
 			setDialogOpen(false);
@@ -401,9 +422,9 @@ export default function OrdersClient() {
 
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				<StatCard title="Novos" value={counters.new} />
-				<StatCard title="Em processamento" value={counters.processing} />
-				<StatCard title="Disponíveis para retirada" value={counters.pickup} />
-				<StatCard title="Concluídos" value={counters.completed} />
+				<StatCard title="Em andamento" value={counters.active} />
+				<StatCard title="Aguard. pag. final" value={counters.awaitingPayment} />
+				<StatCard title="Concluídos" value={counters.done} />
 			</div>
 
 			<div className="mt-6 flex flex-col items-stretch gap-3 md:flex-row md:items-center md:justify-between">
@@ -472,55 +493,57 @@ export default function OrdersClient() {
 					</AlertDialogHeader>
 
 					<div className="space-y-4 py-4">
-						{/* Campo de seleção de status */}
-						<div className="space-y-2">
-							<label className="text-sm font-medium leading-none">
-								Novo status <span className="text-red-500">*</span>
-							</label>
-							<Select
-								value={nextStatus}
-								onValueChange={(v) => setNextStatus(v as OrderStatus)}
-							>
-								<SelectTrigger className="w-full">
-									<SelectValue placeholder="Selecione o status" />
-								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="processing">Em processamento</SelectItem>
-									<SelectItem value="pickup">Disponível para retirada</SelectItem>
-									<SelectItem value="completed">Concluído</SelectItem>
-								</SelectContent>
-							</Select>
-						</div>
+						{(() => {
+							const sale = rawSales.find(s => s.id === selectedOrderId);
+							const order = orders.find(o => o.id === selectedOrderId);
+							const available = getAvailableNextStatuses(order?.status ?? "new", sale);
+							const activeHint = available.find(s => s.value === nextStatus)?.hint;
 
-						{/* Campo de peso da carga (condicional) */}
-						{nextStatus === "pickup" && (
-							<div className="space-y-2">
-								<label htmlFor="cargoWeight" className="text-sm font-medium leading-none">
-									Peso da carga (kg) <span className="text-red-500">*</span>
-								</label>
-								<Input
-									id="cargoWeight"
-									type="number"
-									placeholder="Digite o peso em kg"
-									value={cargoWeight}
-									onChange={(e) => setCargoWeight(e.target.value)}
-									className="w-full"
-									min="0.01"
-									step="0.01"
-									required
-								/>
-							</div>
-						)}
+							if (available.length === 0) {
+								return (
+									<p className="text-sm text-muted-foreground">
+										{order?.status === "weighing"
+											? "Registre o peso da carga para avançar automaticamente."
+											: "Nenhuma transição de status disponível no momento."}
+									</p>
+								);
+							}
 
-						{/* Mensagem de erro */}
+							return (
+								<>
+									<div className="space-y-2">
+										<label className="text-sm font-medium leading-none">
+											Novo status <span className="text-red-500">*</span>
+										</label>
+										<Select
+											value={nextStatus}
+											onValueChange={(v) => setNextStatus(v as OrderStatus)}
+										>
+											<SelectTrigger className="w-full">
+												<SelectValue placeholder="Selecione o status" />
+											</SelectTrigger>
+											<SelectContent>
+												{available.map(opt => (
+													<SelectItem key={opt.value} value={opt.value} disabled={opt.disabled}>
+														{opt.label}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+										{activeHint && (
+											<p className="text-xs text-amber-600">{activeHint}</p>
+										)}
+									</div>
+									<p className="text-sm text-muted-foreground">
+										Tem certeza que deseja alterar o status deste pedido?
+									</p>
+								</>
+							);
+						})()}
+
 						{updateError && (
 							<p className="text-sm text-red-600">{updateError}</p>
 						)}
-
-						{/* Mensagem de confirmação */}
-						<p className="text-sm text-muted-foreground">
-							Tem certeza que deseja alterar o status deste pedido?
-						</p>
 					</div>
 
 					<AlertDialogFooter>

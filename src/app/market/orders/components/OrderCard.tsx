@@ -13,7 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Eye, RefreshCcw, CheckCircle2, XCircle, Info, FileText, LoaderCircle, BadgeCheck, Clock, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { moneyMask } from "@/utils/functions";
 import { Order, SaleData } from "@/types/types";
@@ -32,6 +31,22 @@ import { useState } from "react";
 import SaleDetailClient from "@/components/sale/SaleDetailClient";
 import ContractTemplate from "@/components/sale/ContractTemplate";
 import { getContractView } from "@/actions/contract";
+import {
+  Eye,
+  RefreshCcw,
+  CheckCircle2,
+  XCircle,
+  Info,
+  FileText,
+  LoaderCircle,
+  BadgeCheck,
+  Clock,
+  Upload,
+  Sprout,
+  Scale,
+  AlertCircle,
+  ExternalLink,
+} from "lucide-react";
 
 export function OrderCard({
   order,
@@ -43,7 +58,6 @@ export function OrderCard({
 }: {
   order: Order;
   saleData?: SaleData;
-  /** Conditions aceitas pelo vendedor nesta sessão — sobrescreve o cache do backend */
   acceptedConditions?: Record<string, unknown>;
   onChangeStatus: () => void;
   onAccept: () => void;
@@ -61,6 +75,22 @@ export function OrderCard({
   const [isUploadingCanhoto, setIsUploadingCanhoto] = useState(false);
   const [canhotoError, setCanhotoError] = useState<string | null>(null);
   const [canhotoDone, setCanhotoDone] = useState(false);
+
+  // Autorizar colheita
+  const [harvestAuthorizing, setHarvestAuthorizing] = useState(false);
+  const [harvestAuthorized, setHarvestAuthorized] = useState(false);
+  const [harvestError, setHarvestError] = useState<string | null>(null);
+
+  // Pesagem da balança
+  const [weightOpen, setWeightOpen] = useState(false);
+  const [weightKg, setWeightKg] = useState("");
+  const [weightFile, setWeightFile] = useState<File | null>(null);
+  const [weightUploading, setWeightUploading] = useState(false);
+  const [weightError, setWeightError] = useState<string | null>(null);
+  const [weightDone, setWeightDone] = useState(false);
+  const [weightFileUrl, setWeightFileUrl] = useState<string | null>(null);
+
+  const downPaymentConfirmed = saleData?.firstInstallmentPaid ?? saleData?.downPaymentCompleted ?? false;
 
   async function handleUploadCanhoto() {
     if (!canhotoUrl.trim()) {
@@ -89,6 +119,62 @@ export function OrderCard({
     }
   }
 
+  async function handleAuthorizeHarvest() {
+    try {
+      setHarvestAuthorizing(true);
+      setHarvestError(null);
+      const res = await fetch(`/api/sales/${order.id}/authorize-harvest`, {
+        method: "PATCH",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(data.error ?? "Erro ao autorizar colheita");
+      }
+      setHarvestAuthorized(true);
+    } catch (e: unknown) {
+      setHarvestError(e instanceof Error ? e.message : "Erro ao autorizar colheita");
+    } finally {
+      setHarvestAuthorizing(false);
+    }
+  }
+
+  async function handleWeightUpload() {
+    if (!weightFile || !weightKg.trim()) {
+      setWeightError("Preencha o peso e selecione um arquivo comprovante.");
+      return;
+    }
+    const weightNum = Number(weightKg);
+    if (isNaN(weightNum) || weightNum <= 0) {
+      setWeightError("Informe um peso válido maior que zero.");
+      return;
+    }
+    try {
+      setWeightUploading(true);
+      setWeightError(null);
+      const fd = new FormData();
+      fd.append("file", weightFile);
+      fd.append("weightKg", String(weightNum));
+      const res = await fetch(`/api/sales/${order.id}/weight`, {
+        method: "POST",
+        credentials: "include",
+        body: fd,
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        throw new Error(data.error ?? "Erro ao registrar pesagem");
+      }
+      const data = await res.json() as { fileUrl?: string };
+      setWeightFileUrl(data.fileUrl ?? null);
+      setWeightDone(true);
+      setWeightOpen(false);
+    } catch (e: unknown) {
+      setWeightError(e instanceof Error ? e.message : "Erro ao registrar pesagem");
+    } finally {
+      setWeightUploading(false);
+    }
+  }
+
   async function handleViewContract() {
     setContractOpen(true);
     if (contractData !== null) return;
@@ -98,9 +184,6 @@ export function OrderCard({
       const productId = saleData?.boughtProducts?.[0]?.productId;
       const { contract, ok, error } = await getContractView(order.id, productId);
       if (!ok) throw new Error(error ?? "Erro ao carregar contrato");
-      // Mescla as conditions aceitas nesta sessão sobre o retorno do backend.
-      // Isso garante que "Ver contrato" mostre os dados corretos mesmo que o
-      // backend ainda não tenha persistido o snapshot atualizado.
       const merged = acceptedConditions
         ? {
             ...contract,
@@ -160,9 +243,15 @@ export function OrderCard({
                   {order.action === 'rejected' ? 'Recusado' : (
                     <>
                       {order.status === 'new' && 'Novo'}
-                      {order.status === 'processing' && 'Processando'}
-                      {order.status === 'pickup' && 'Pronto para retirada'}
+                      {order.status === 'processing' && 'Em processamento'}
+                      {order.status === 'down_payment_confirmed' && 'Entrada confirmada'}
+                      {order.status === 'harvest_authorized' && 'Colheita autorizada'}
+                      {order.status === 'harvest_completed' && 'Colheita concluída'}
+                      {order.status === 'weighing' && 'Em pesagem'}
+                      {order.status === 'awaiting_final_payment' && 'Aguard. pag. final'}
+                      {order.status === 'pickup' && 'Disponível p/ entrega'}
                       {order.status === 'completed' && 'Concluído'}
+                      {order.status === 'cancelled' && 'Cancelado'}
                     </>
                   )}
                 </span>
@@ -178,11 +267,16 @@ export function OrderCard({
                 <span className="text-muted-foreground">Pagamento:</span>{" "}
                 <span className="font-medium">{order.payment}</span>
               </div>
-              <div className="col-span-2 flex items-center gap-2">
+              <div className="col-span-2 flex flex-wrap items-center gap-2">
                 {order.paymentCompleted ? (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-green-50 border border-green-200 px-3 py-1 text-xs font-semibold text-green-700">
                     <BadgeCheck className="w-3.5 h-3.5" />
                     Pagamento confirmado
+                  </span>
+                ) : downPaymentConfirmed ? (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 border border-blue-200 px-3 py-1 text-xs font-semibold text-blue-700">
+                    <BadgeCheck className="w-3.5 h-3.5" />
+                    Entrada confirmada - aguardando colheita
                   </span>
                 ) : (
                   <span className="inline-flex items-center gap-1.5 rounded-full bg-yellow-50 border border-yellow-200 px-3 py-1 text-xs font-medium text-yellow-700">
@@ -190,10 +284,33 @@ export function OrderCard({
                     Aguardando pagamento
                   </span>
                 )}
+                {harvestAuthorized && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 border border-emerald-200 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    <Sprout className="w-3.5 h-3.5" />
+                    Colheita autorizada
+                  </span>
+                )}
               </div>
             </div>
 
-            <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs text-muted-foreground">
+            {harvestError && (
+              <div className="flex gap-2 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <p>{harvestError}</p>
+              </div>
+            )}
+
+            {weightDone && weightFileUrl && (
+              <div className="flex items-center gap-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded-md px-3 py-2">
+                <Scale className="w-4 h-4" />
+                <span>Pesagem registrada.</span>
+                <a href={weightFileUrl} target="_blank" rel="noopener noreferrer" className="underline flex items-center gap-1">
+                  Ver comprovante <ExternalLink className="w-3 h-3" />
+                </a>
+              </div>
+            )}
+
+            <div className="flex flex-wrap gap-4 text-xs text-muted-foreground">
               {order.createdAt && (
                 <span>
                   Pedido realizado em:{" "}
@@ -218,23 +335,55 @@ export function OrderCard({
               )}
             </div>
 
-            <div className="flex flex-col gap-3 md:flex-row">
-              <Button
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={() => setSheetOpen(true)}
-              >
+            <div className="flex flex-col gap-3 md:flex-row flex-wrap">
+              <Button variant="outline" className="flex-1 gap-2" onClick={() => setSheetOpen(true)}>
                 <Eye className="size-4" /> Ver detalhes
               </Button>
 
-              <Button
-                variant="outline"
-                className="flex-1 gap-2"
-                onClick={handleViewContract}
-              >
+              <Button variant="outline" className="flex-1 gap-2" onClick={handleViewContract}>
                 <FileText className="size-4" /> Ver contrato
               </Button>
 
+              {/* Autorizar Colheita */}
+              {order.action === "accepted" && !harvestAuthorized && (
+                <Button
+                  variant="outline"
+                  className={`flex-1 gap-2 ${downPaymentConfirmed
+                    ? 'text-emerald-700 border-emerald-300 hover:bg-emerald-50'
+                    : 'text-gray-400 border-gray-200 cursor-not-allowed'
+                  }`}
+                  disabled={!downPaymentConfirmed || harvestAuthorizing}
+                  onClick={handleAuthorizeHarvest}
+                  title={!downPaymentConfirmed ? 'Aguardando confirmação da entrada (30%) pelo comprador' : undefined}
+                >
+                  {harvestAuthorizing ? (
+                    <><LoaderCircle className="size-4 animate-spin" /> Autorizando...</>
+                  ) : (
+                    <><Sprout className="size-4" /> Autorizar Colheita</>
+                  )}
+                </Button>
+              )}
+
+              {/* Registrar Pesagem */}
+              {order.action === "accepted" && (
+                <>
+                  {weightDone ? (
+                    <span className="flex-1 inline-flex items-center justify-center gap-2 rounded-md bg-green-50 border border-green-200 px-4 py-2 text-green-700 text-sm font-medium h-10">
+                      <Scale className="size-4" /> Pesagem registrada
+                    </span>
+                  ) : (
+                    <Button
+                      variant="outline"
+                      className="flex-1 gap-2 text-blue-700 border-blue-300 hover:bg-blue-50"
+                      onClick={() => setWeightOpen(true)}
+                    >
+                      <Scale className="size-4" /> Registrar Pesagem
+                    </Button>
+                  )}
+                </>
+              )}
+
+              {/* Canhoto NF */}
               {order.paymentCompleted && !canhotoDone && (
                 <Button
                   variant="outline"
@@ -255,7 +404,6 @@ export function OrderCard({
                   <Button className="flex-1 gap-2" onClick={onAccept}>
                     <CheckCircle2 className="size-4" /> Aceitar
                   </Button>
-
                   <AlertDialog>
                     <AlertDialogTrigger asChild>
                       <Button variant="destructive" className="flex-1 gap-2">
@@ -298,6 +446,7 @@ export function OrderCard({
         </CardContent>
       </Card>
 
+      {/* Sheet: detalhes */}
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="mb-4">
@@ -307,6 +456,7 @@ export function OrderCard({
         </SheetContent>
       </Sheet>
 
+      {/* Dialog: contrato */}
       <Dialog open={contractOpen} onOpenChange={setContractOpen}>
         <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
@@ -343,6 +493,7 @@ export function OrderCard({
         </DialogContent>
       </Dialog>
 
+      {/* Dialog: canhoto NF */}
       <Dialog open={canhotoOpen} onOpenChange={setCanhotoOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
@@ -373,6 +524,65 @@ export function OrderCard({
                 <><LoaderCircle className="w-4 h-4 animate-spin mr-2" />Enviando...</>
               ) : (
                 <><Upload className="w-4 h-4 mr-2" />Enviar</>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Dialog: registrar pesagem */}
+      <Dialog open={weightOpen} onOpenChange={setWeightOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Registrar Pesagem da Balança</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <p className="text-sm text-gray-600">
+              Informe o peso medido e anexe a foto ou PDF do ticket da balança como comprovante.
+            </p>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">
+                Peso (kg) <span className="text-red-500">*</span>
+              </label>
+              <Input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="Ex: 1250.50"
+                value={weightKg}
+                onChange={(e) => { setWeightKg(e.target.value); setWeightError(null); }}
+              />
+            </div>
+            <div className="space-y-1">
+              <label className="text-sm font-medium">
+                Comprovante (foto ou PDF) <span className="text-red-500">*</span>
+              </label>
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                onChange={(e) => { setWeightFile(e.target.files?.[0] ?? null); setWeightError(null); }}
+                className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer"
+              />
+              {weightFile && (
+                <p className="text-xs text-gray-500 mt-1">Arquivo selecionado: {weightFile.name}</p>
+              )}
+            </div>
+            {weightError && (
+              <div className="flex gap-2 text-sm text-red-600">
+                <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+                <p>{weightError}</p>
+              </div>
+            )}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setWeightOpen(false)} disabled={weightUploading}>
+              Cancelar
+            </Button>
+            <Button onClick={handleWeightUpload} disabled={weightUploading} className="bg-green-600 hover:bg-green-700">
+              {weightUploading ? (
+                <><LoaderCircle className="w-4 h-4 animate-spin mr-2" />Registrando...</>
+              ) : (
+                <><Scale className="w-4 h-4 mr-2" />Registrar</>
               )}
             </Button>
           </DialogFooter>
