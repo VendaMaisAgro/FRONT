@@ -1,5 +1,6 @@
 import { verifySession } from "@/lib/session";
 import { Product } from "@/types/types";
+import { isHarvestAvailable } from "@/utils/functions";
 import { cookies } from "next/headers";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -18,7 +19,7 @@ export async function GET(req: NextRequest) {
   });
   const data: Product[] = await res.json();
 
-  return NextResponse.json(data);
+  return NextResponse.json(data.filter((p) => isHarvestAvailable(p.harvestAt)));
 }
 
 export async function POST(request: NextRequest) {

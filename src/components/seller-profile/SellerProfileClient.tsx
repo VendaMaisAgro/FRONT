@@ -10,6 +10,7 @@ import type {
     SellerHeaderData,
     SellerProfileClientProps
 } from "@/types/types";
+import { isHarvestAvailable } from "@/utils/functions";
 import { notFound, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import ProductsCarousel from "../productsCarousel";
@@ -57,13 +58,18 @@ export default function SellerProfileClient({ sellerId }: SellerProfileClientPro
         })();
     }, [sellerId]);
 
-    const categories = useMemo(
-        () => Array.from(new Set(products.map((p) => p.category || "Outros"))).filter(Boolean),
+    const availableProducts = useMemo(
+        () => products.filter((p) => isHarvestAvailable(p.harvestAt)),
         [products]
     );
 
+    const categories = useMemo(
+        () => Array.from(new Set(availableProducts.map((p) => p.category || "Outros"))).filter(Boolean),
+        [availableProducts]
+    );
+
     const filteredProducts = useMemo(() => {
-        const formatted = products.map((product) => ({
+        const formatted = availableProducts.map((product) => ({
             ...product,
             id: product.id.toString(),
             sellingUnitProduct: (product.sellingUnitProduct || []).map((u) => ({
@@ -77,7 +83,7 @@ export default function SellerProfileClient({ sellerId }: SellerProfileClientPro
         }
 
         return formatted;
-    }, [activeTab, activeCategory, products]);
+    }, [activeTab, activeCategory, availableProducts]);
 
     if (loading) {
         return (

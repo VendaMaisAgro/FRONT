@@ -334,7 +334,7 @@ export type SalesApiResponse = {
 
 export type ProductFromSeller = Pick<
 	Product,
-	'id' | 'name' | 'category' | 'variety' | 'images_Path'
+	'id' | 'name' | 'category' | 'variety' | 'images_Path' | 'harvestAt'
 > & {
 	sellingUnitProduct: SellingUnitProduct[];
 };
