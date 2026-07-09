@@ -54,7 +54,8 @@ export function OrderCard({
   acceptedConditions,
   onChangeStatus,
   onAccept,
-  onReject
+  onReject,
+  onWeightRegistered,
 }: {
   order: Order;
   saleData?: SaleData;
@@ -62,6 +63,7 @@ export function OrderCard({
   onChangeStatus: () => void;
   onAccept: () => void;
   onReject: () => void;
+  onWeightRegistered?: () => void;
 }) {
   const [sheetOpen, setSheetOpen] = useState(false);
 
@@ -177,6 +179,8 @@ export function OrderCard({
       setWeightFileUrl(data.fileUrl ?? null);
       setWeightDone(true);
       setWeightOpen(false);
+      // Recarrega os dados do pedido para refletir o novo total no contrato e na compra
+      onWeightRegistered?.();
     } catch (e: unknown) {
       setWeightError(e instanceof Error ? e.message : "Erro ao registrar pesagem");
     } finally {

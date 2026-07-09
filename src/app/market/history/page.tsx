@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Search, ShoppingCart } from 'lucide-react'
 import OrderCard, { OrderView } from './components/OrderCard'
 import { Skeleton } from '@/components/ui/skeleton'
-import { formatDate } from '@/utils/functions'
+import { formatDate, calcAdjustedTotal } from '@/utils/functions'
 import type { SaleData, SaleBoughtProduct } from '@/types/types'
 
 function resolveProductName(bp: SaleBoughtProduct): string {
@@ -46,9 +46,7 @@ export default function OrderHistoryPage() {
               }
             })
 
-            // it.value já é o valor total (preço unitário * quantidade)
-            const itemsTotal = (s.boughtProducts ?? []).reduce((acc, it) => acc + Number(it.value), 0)
-            const total = Number((itemsTotal + Number(s.transportValue || 0)))
+            const total = calcAdjustedTotal(s)
 
             const vendorLabel =
               s.boughtProducts?.[0]?.product?.sellerId != null || s.boughtProducts?.[0]?.product?.seller

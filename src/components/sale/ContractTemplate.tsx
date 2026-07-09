@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import type { SaleData } from "@/types/types";
+import { calcAdjustedTotal } from "@/utils/functions";
 
 const BLANK = "_______________________";
 
@@ -168,9 +169,7 @@ export default function ContractTemplate({
         undefined;
 
     // ── Resolve total ──────────────────────────────────────────────────────
-    const calcTotal = saleData
-        ? (saleData.boughtProducts ?? []).reduce((s, bp) => s + Number(bp.value), 0) + Number(saleData.transportValue ?? 0)
-        : null;
+    const calcTotal = saleData ? calcAdjustedTotal(saleData) : null;
     const rawTotal  = preCheckoutData?.total ?? (data?.conditions?.total || data?.conditions?.totalValue || data?.conditions?.value || undefined) ?? calcTotal;
     const [totalValue, setTotalValue] = useState(rawTotal != null ? String(Number(rawTotal).toFixed(2)) : "");
     useEffect(() => {
@@ -252,6 +251,9 @@ export default function ContractTemplate({
                 <p><strong>Endereço/Origem:</strong> {val(sellerAddr)}</p>
                 <p><strong>Produto/Variedade:</strong> {productSummary}</p>
                 <p><strong>Quantidade Total (Kg/Ton):</strong> {totalAmountStr}</p>
+                {saleData?.cargoWeightKg && parseFloat(saleData.cargoWeightKg) > 0 && (
+                    <p><strong>Peso Final Registrado (Balança):</strong> {saleData.cargoWeightKg} kg</p>
+                )}
                 <p><strong>Valor Unitário:</strong> {unitPriceStr}</p>
                 <p>
                     <strong>Tipo de Embalagem:</strong>{" "}

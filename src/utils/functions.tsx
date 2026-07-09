@@ -117,3 +117,25 @@ export function currencyFormatter(value: number | string): string {
 	const n = typeof value === "string" ? Number(value) : value;
 	return moneyMask(Number.isFinite(n) ? (n as number) : 0);
 }
+
+import type { SaleData } from "@/types/types";
+
+/**
+ * Retorna o valor total ajustado pela pesagem.
+ * Quando cargoWeightKg está presente: peso × preço/unidade + frete.
+ * Caso contrário: soma dos boughtProducts.value + frete (valor original).
+ */
+export function calcAdjustedTotal(saleData: SaleData): number {
+	const bps = saleData.boughtProducts ?? [];
+	const transport = Number(saleData.transportValue ?? 0);
+	const totalProductValue = bps.reduce((acc, bp) => acc + Number(bp.value), 0);
+
+	const weightKg = parseFloat(saleData.cargoWeightKg ?? "0");
+	if (weightKg > 0) {
+		const totalQty = bps.reduce((acc, bp) => acc + Number(bp.amount), 0);
+		const pricePerUnit = totalQty > 0 ? totalProductValue / totalQty : 0;
+		return weightKg * pricePerUnit + transport;
+	}
+
+	return totalProductValue + transport;
+}

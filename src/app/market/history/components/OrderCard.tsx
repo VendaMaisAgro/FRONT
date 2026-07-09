@@ -113,6 +113,8 @@ export default React.memo(function OrderCard({ order, saleData }: { order: Order
     const [finalBoletoResult, setFinalBoletoResult] = useState<{ ticket_url?: string; digitable_line?: string } | null>(null)
     const [generatingFinalBoleto, setGeneratingFinalBoleto] = useState(false)
     const [finalBoletoError, setFinalBoletoError] = useState<string | null>(null)
+    // Dados frescos do pedido para garantir cargoWeightKg atualizado ao abrir o dialog
+    const [currentSaleData, setCurrentSaleData] = useState<SaleData | undefined>(saleData)
 
     const handlePayment = () => {
         if (isValidUUID(order.id)) {
@@ -185,6 +187,26 @@ export default React.memo(function OrderCard({ order, saleData }: { order: Order
         }
     }
 
+    function calcFinalAmount(data?: SaleData): number {
+        const sd = data ?? currentSaleData ?? saleData
+        const bps = sd?.boughtProducts ?? []
+        const transport = Number(sd?.transportValue ?? 0)
+        const totalProductValue = bps.reduce((acc, bp) => acc + Number(bp.value), 0)
+        const originalTotal = totalProductValue + transport
+
+        const weightKg = parseFloat(sd?.cargoWeightKg ?? '0')
+        if (weightKg > 0) {
+            const totalQty = bps.reduce((acc, bp) => acc + Number(bp.amount), 0)
+            const pricePerUnit = totalQty > 0 ? totalProductValue / totalQty : 0
+            const newProductTotal = weightKg * pricePerUnit
+            const firstInstallmentPaid = originalTotal * 0.3
+            return Math.max(0, newProductTotal + transport - firstInstallmentPaid)
+        }
+
+        // Sem peso registrado: fallback para 70% do total original
+        return originalTotal * 0.7
+    }
+
     async function handleOpenFinalBoleto() {
         setFinalBoletoOpen(true)
         setFinalBoletoError(null)
@@ -198,12 +220,26 @@ export default React.memo(function OrderCard({ order, saleData }: { order: Order
             if (res.ok && data.amount != null) {
                 setFinalAmount(data.amount)
             } else {
-                // Fallback enquanto o backend não implementa o endpoint:
-                // calcula 70% do total original do pedido
-                setFinalAmount(order.total * 0.7)
+                // Backend não tem o endpoint ainda — busca dados frescos para ter o peso atualizado
+                try {
+                    const salesRes = await fetch('/api/sale?mine=1', {
+                        credentials: 'include',
+                        cache: 'no-store',
+                    })
+                    if (salesRes.ok) {
+                        const sales = await salesRes.json() as SaleData[]
+                        const freshSale = sales.find(s => s.id === order.id)
+                        if (freshSale) {
+                            setCurrentSaleData(freshSale)
+                            setFinalAmount(calcFinalAmount(freshSale))
+                            return
+                        }
+                    }
+                } catch { /* fall through */ }
+                setFinalAmount(calcFinalAmount())
             }
         } catch {
-            setFinalAmount(order.total * 0.7)
+            setFinalAmount(calcFinalAmount())
         } finally {
             setLoadingFinalAmount(false)
         }
@@ -213,7 +249,8 @@ export default React.memo(function OrderCard({ order, saleData }: { order: Order
         setGeneratingFinalBoleto(true)
         setFinalBoletoError(null)
         try {
-            const bps = saleData?.boughtProducts ?? []
+            const sd = currentSaleData ?? saleData
+            const bps = sd?.boughtProducts ?? []
             const productId = bps[0]?.productId
             const productName = bps[0]?.product?.name ?? 'Produto'
             const quantity = bps.reduce((acc, bp) => acc + Number(bp.amount), 0) || 1
@@ -609,7 +646,9 @@ export default React.memo(function OrderCard({ order, saleData }: { order: Order
                                     {finalAmount != null ? currencyFormatter(finalAmount) : '—'}
                                 </p>
                                 <p className="text-xs text-gray-500">
-                                    Valor referente ao saldo de 70% do pedido. Pode ser ajustado conforme o peso registrado na pesagem.
+                                    {(currentSaleData ?? saleData)?.cargoWeightKg
+                                        ? `Calculado: ${(currentSaleData ?? saleData)!.cargoWeightKg} kg × preço/kg − 1ª parcela paga.`
+                                        : 'Saldo restante do pedido após pagamento da entrada (30%).'}
                                 </p>
                                 {finalBoletoError && (
                                     <div className="flex gap-2 text-red-600 text-sm">

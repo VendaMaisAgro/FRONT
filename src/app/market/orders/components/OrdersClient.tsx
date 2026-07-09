@@ -35,6 +35,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Order, OrderStatus, SaleData } from "@/types/types";
+import { calcAdjustedTotal } from "@/utils/functions";
 import ContractTemplate, { ContractContextData } from "@/components/sale/ContractTemplate";
 import { getContractView, acceptContract } from "@/actions/contract";
 import {
@@ -124,10 +125,7 @@ function transformSaleDataToOrder(sale: SaleData): Order {
 		})
 		.join(", ");
 
-	// Calcular valor total (produtos + frete)
-	const totalValue =
-		(sale.boughtProducts ?? []).reduce((sum, bp) => sum + Number(bp.value), 0) +
-		Number(sale.transportValue ?? 0);
+	const totalValue = calcAdjustedTotal(sale);
 
 	return {
 		id: sale.id,
@@ -482,6 +480,7 @@ export default function OrdersClient() {
 						onChangeStatus={() => openStatusDialog(order.id, order.status)}
 						onAccept={() => handleAcceptOrder(order.id)}
 						onReject={() => handleRejectOrder(order.id)}
+						onWeightRegistered={() => loadSalesData(false)}
 					/>
 				))}
 			</div>
