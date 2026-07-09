@@ -193,18 +193,24 @@ export default function ContractTemplate({
     const rawDelivery = isoToInput(preCheckoutData?.plannedDeliveryDate ?? data?.conditions?.plannedDeliveryDate ?? data?.conditions?.deliveryDate ?? (saleData as Record<string, unknown>)?.plannedDeliveryDate as string | undefined);
     const rawActual   = isoToInput(data?.conditions?.actualDeliveryDate ?? saleData?.actualDeliveryDate);
 
+    // Only the editable seller-edit step suggests harvest+15 as a starting point;
+    // read-only previews and buyer-checkout must show blank until a date is actually set.
+    const suggestDates = !isReadOnly && !isBuyerCheckout;
+
     const [harvestDate,    setHarvestDate]    = useState(harvestInput);
-    const [sellerPickup,   setSellerPickup]   = useState(rawPickup   || (harvestInput ? addDays(harvestInput, 15) : ""));
-    const [sellerDelivery, setSellerDelivery] = useState(rawDelivery || (harvestInput ? addDays(harvestInput, 15) : ""));
-    const [actualDelivery, setActualDelivery] = useState(rawActual   || (harvestInput ? addDays(harvestInput, 15) : ""));
+    const [sellerPickup,   setSellerPickup]   = useState(rawPickup   || (suggestDates && harvestInput ? addDays(harvestInput, 15) : ""));
+    const [sellerDelivery, setSellerDelivery] = useState(rawDelivery || (suggestDates && harvestInput ? addDays(harvestInput, 15) : ""));
+    const [actualDelivery, setActualDelivery] = useState(rawActual   || (suggestDates && harvestInput ? addDays(harvestInput, 15) : ""));
 
     useEffect(() => {
         if (harvestInput) {
             setHarvestDate(harvestInput);
-            const p7 = addDays(harvestInput, 15);
-            if (!rawPickup)   setSellerPickup(p7);
-            if (!rawDelivery) setSellerDelivery(p7);
-            if (!rawActual)   setActualDelivery(p7);
+            if (suggestDates) {
+                const p7 = addDays(harvestInput, 15);
+                if (!rawPickup)   setSellerPickup(p7);
+                if (!rawDelivery) setSellerDelivery(p7);
+                if (!rawActual)   setActualDelivery(p7);
+            }
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [harvestInput]);
