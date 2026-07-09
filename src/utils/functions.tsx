@@ -1,3 +1,5 @@
+import { isBefore, startOfDay } from "date-fns";
+
 export function moneyMask(value: number): string {
 	const n = Number(value);
 	return new Intl.NumberFormat("pt-BR", {
@@ -83,6 +85,10 @@ export function formatDate(date: string) {
 		year: "2-digit",
 	});
 	return formattedDate;
+}
+
+export function isHarvestAvailable(harvestAt: string | Date): boolean {
+	return isBefore(startOfDay(new Date()), startOfDay(new Date(harvestAt)));
 }
 
 export function removeMoneyMask(value: string): number {

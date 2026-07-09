@@ -3,6 +3,7 @@
 import { CreateProductSchemaType } from "@/lib/schemas";
 import { verifySession } from "@/lib/session";
 import { ProductToApi } from "@/types/types";
+import { isHarvestAvailable } from "@/utils/functions";
 import { mapProductDataToFormData } from "@/utils/mappers/mapProductDataToFormData";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -150,7 +151,7 @@ export async function getAll() {
 		return [];
 	}
 	const data = await res.json()
-	return data.filter((p: any) => p.sellerId !== id);
+	return data.filter((p: any) => p.sellerId !== id && isHarvestAvailable(p.harvestAt));
 }
 
 export async function getAllFromSeller(id?: string) {
