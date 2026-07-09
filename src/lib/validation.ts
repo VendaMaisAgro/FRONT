@@ -67,7 +67,9 @@ export function isValidId(str: string | null | undefined): boolean {
 }
 
 /**
- * Valida dados de pagamento antes de enviar
+ * Valida dados de pagamento antes de enviar.
+ * Quando phase === "down_payment", o amount não é validado — o backend
+ * ignora o valor enviado e calcula o valor correto da entrada (30%).
  */
 export function validatePaymentData(data: {
 	saleId: string;
@@ -76,18 +78,17 @@ export function validatePaymentData(data: {
 	title: string;
 	unit_price: number;
 	quantity: number;
-	amount: number;
+	amount?: number;
+	phase?: string;
 }): { valid: boolean; error?: string } {
 	if (!isValidUUID(data.saleId)) {
 		return { valid: false, error: 'ID da venda inválido' };
 	}
 
-	// paymentMethodId pode não ser UUID, apenas validar que não está vazio
-	// Aceitar UUID ou qualquer string não vazia (o backend vai validar)
 	if (!data.paymentMethodId || typeof data.paymentMethodId !== 'string') {
 		return { valid: false, error: 'ID do método de pagamento inválido' };
 	}
-	
+
 	const paymentMethodIdStr = String(data.paymentMethodId).trim();
 	if (paymentMethodIdStr.length === 0 || paymentMethodIdStr.length > 100) {
 		return { valid: false, error: 'ID do método de pagamento inválido' };
@@ -109,8 +110,11 @@ export function validatePaymentData(data: {
 		return { valid: false, error: 'Quantidade inválida' };
 	}
 
-	if (!isValidNumber(data.amount) || data.amount <= 0) {
-		return { valid: false, error: 'Valor total inválido' };
+	// Para phase down_payment o backend calcula o valor — não validar amount
+	if (data.phase !== 'down_payment') {
+		if (data.amount == null || !isValidNumber(data.amount) || data.amount <= 0) {
+			return { valid: false, error: 'Valor total inválido' };
+		}
 	}
 
 	return { valid: true };
