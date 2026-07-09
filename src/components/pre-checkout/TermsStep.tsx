@@ -31,13 +31,6 @@ interface ProductDetail {
     unit: string;
 }
 
-function addDays(iso: string, days: number): string {
-    const d = new Date(iso);
-    if (isNaN(d.getTime())) return "";
-    d.setDate(d.getDate() + days);
-    return d.toISOString().split("T")[0];
-}
-
 export default function TermsStep() {
     const { control, watch } = useFormContext<PreCheckoutFormType>();
     const [isExpanded, setIsExpanded] = useState(false);
@@ -45,8 +38,10 @@ export default function TermsStep() {
     const [sellerDetail, setSellerDetail] = useState<SellerDetail | null>(null);
     const [productDetails, setProductDetails] = useState<ProductDetail[]>([]);
 
-    const [plannedPickupDate, setPlannedPickupDate] = useState("");
-    const [plannedDeliveryDate, setPlannedDeliveryDate] = useState("");
+    // Pickup/delivery dates are intentionally left blank at pre-checkout;
+    // they're filled in by the seller in the following steps.
+    const plannedPickupDate = "";
+    const plannedDeliveryDate = "";
 
     const {
         getSellers,
@@ -113,17 +108,6 @@ export default function TermsStep() {
             .catch(console.error);
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [storeProducts.length]);
-
-    // Auto-fill dates from harvestAt + 15 days
-    useEffect(() => {
-        const harvestIso = productDetails[0]?.harvestAt;
-        if (harvestIso) {
-            const plus15 = addDays(harvestIso, 15);
-            if (!plannedPickupDate)   setPlannedPickupDate(plus15);
-            if (!plannedDeliveryDate) setPlannedDeliveryDate(plus15);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [productDetails]);
 
     // Sync contract snapshot to checkout store whenever resolved data changes
     useEffect(() => {
