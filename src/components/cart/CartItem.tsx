@@ -51,13 +51,11 @@ export default function CartItem({
 
 	async function changeProductAmount(
 		id: string,
-		amount: number,
-		unitaryPrice: number, //TODO: remover esse dado quando o backend estiver fazendo o cálculo
-		type: 'increase' | 'decrease'
+		newAmount: number,
+		unitaryPrice: number //TODO: remover esse dado quando o backend estiver fazendo o cálculo
 	) {
 		setIsAmountSelectorLoading(true);
 
-		const newAmount = type === 'increase' ? amount + 1 : amount - 1;
 		const newValue = newAmount * unitaryPrice;
 		const payload = {
 			amount: newAmount,
@@ -122,17 +120,22 @@ export default function CartItem({
 							increaseHandler={() =>
 								changeProductAmount(
 									data.id,
-									data.amount,
-									data.sellingUnitProduct.minPrice,
-									'increase'
+									data.amount + 1,
+									data.sellingUnitProduct.minPrice
 								)
 							}
 							decreaseHandler={() =>
 								changeProductAmount(
 									data.id,
-									data.amount,
-									data.sellingUnitProduct.minPrice,
-									'decrease'
+									data.amount - 1,
+									data.sellingUnitProduct.minPrice
+								)
+							}
+							changeHandler={(newAmount) =>
+								changeProductAmount(
+									data.id,
+									newAmount,
+									data.sellingUnitProduct.minPrice
 								)
 							}
 							loading={isAmountSelectorLoading}
