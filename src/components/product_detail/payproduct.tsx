@@ -300,9 +300,16 @@ const CompraProduto = ({
 							</button>
 							<input
 								type="text"
+								inputMode="numeric"
 								value={quantity}
-								readOnly
-								className="w-12 text-center border-x border-gray-300 py-1"
+								onChange={(e) => {
+									const digitsOnly = e.target.value.replace(/\D/g, '');
+									setQuantity(digitsOnly ? Number(digitsOnly) : 0);
+								}}
+								onBlur={() => {
+									if (quantity < 1) setQuantity(1);
+								}}
+								className="w-12 text-center border-x border-gray-300 py-1 focus:outline-none"
 							/>
 							<button
 								onClick={increaseQuantity}
