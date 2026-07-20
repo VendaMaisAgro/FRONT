@@ -8,6 +8,7 @@ frontend:
         - echo "SESSION_SECRET=$SESSION_SECRET" >> .env.production
         - echo "BUCKET_HOSTNAME=$BUCKET_HOSTNAME" >> .env.production
         - echo "NEXT_PUBLIC_URL=$NEXT_PUBLIC_URL" >> .env.production
+        - echo "NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY=$NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY" >> .env.production
     build:
       commands:
         - npm run build
