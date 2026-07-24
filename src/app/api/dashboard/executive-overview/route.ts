@@ -4,6 +4,11 @@ import { NextResponse } from "next/server";
 
 export async function GET() {
   const session = (await cookies()).get("session")?.value;
+
+  if (!session) {
+    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 401 });
+  }
+
   const token = await verifySession(session);
 
   const res = await fetch(`${process.env.API_URL}/dashboard/executive-overview`, {

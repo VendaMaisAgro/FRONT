@@ -4,6 +4,11 @@ import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const session = (await cookies()).get("session")?.value;
+
+  if (!session) {
+    return NextResponse.json({ error: "Sessão não encontrada" }, { status: 401 });
+  }
+
   const token = await verifySession(session);
 
   const { searchParams } = new URL(request.url);
