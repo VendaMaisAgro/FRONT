@@ -1,9 +1,10 @@
 "use client";
+import AdminModeSwitch from "@/components/admin/AdminModeSwitch";
 import { Button } from "@/components/ui/button";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useUserStore } from "@/store/userInfoStore";
 import { sectionsListData } from "@/utils/data";
-import { ChevronRight, Home, LayoutDashboard } from "lucide-react";
+import { ChevronRight, Home } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -68,13 +69,9 @@ export default function Sidemenu({ handleLogout }: SidemenuProps) {
 						<h6>Início</h6>
 					</Link>
 					{user?.role === "admin" && (
-						<Link
-							href="/admin/executive-overview"
-							className="flex gap-2 items-center text-gray-2 hover:text-neutral-900 transition-colors duration-150 mt-3"
-						>
-							<LayoutDashboard size={20} />
-							<h6>Dashboard Executivo</h6>
-						</Link>
+						<div className="mt-3">
+							<AdminModeSwitch />
+						</div>
 					)}
 				</div>
 				{sectionsListData.map((g, _) => {

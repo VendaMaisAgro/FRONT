@@ -1,5 +1,6 @@
 "use client";
 
+import AdminModeSwitch from "@/components/admin/AdminModeSwitch";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -58,6 +59,7 @@ export default function AdminShell({ user, children }: AdminShellProps) {
 							</h1>
 						</div>
 						<div className="flex items-center gap-3">
+							<AdminModeSwitch />
 							<span className="hidden sm:inline text-sm text-foreground/80">
 								{user.name}
 							</span>
