@@ -1,6 +1,7 @@
 "use client";
 
 import logo from "@/assets/logo.svg";
+import AdminModeSwitch from "@/components/admin/AdminModeSwitch";
 import Sidemenu from "@/components/sidemenu";
 import { Button } from "@/components/ui/button";
 import {
@@ -171,6 +172,7 @@ export default function Navbar({ searchedItem = "" }: NavbarProps) {
 				</div>
 				<div className="hidden md:block">
 					<div className="flex gap-4 items-center">
+						{user?.role === "admin" && <AdminModeSwitch />}
 						<div className="relative flex items-center gap-2">
 							{user && (
 								<DropdownMenu>

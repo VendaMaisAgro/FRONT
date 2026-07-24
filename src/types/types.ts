@@ -459,3 +459,70 @@ export type CardPaymentResponse = {
 		status_detail: string;
 	};
 };
+
+// Dashboard Executivo — Visão Executiva (GET /dashboard/executive-overview)
+export type MonthlyForecastActual = {
+	month: string;
+	label: string;
+	previsto: number;
+	realizado: number;
+};
+
+export type ForecastActualAccumulated = {
+	previsto: number;
+	realizado: number;
+};
+
+export type ExecutiveOverviewResponse = {
+	period: { from: string; to: string };
+	faturamento: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	receita: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	operacoes: {
+		monthly: MonthlyForecastActual[];
+	};
+};
+
+// Dashboard Executivo — Pipeline das Operações (GET /dashboard/pipeline)
+export type PipelineStageCount = {
+	stage: number;
+	key: string;
+	label: string;
+	count: number;
+};
+
+export type PipelineFunnelBucket = {
+	key: string;
+	label: string;
+	count: number;
+};
+
+export type PipelineListRow = {
+	id: string;
+	orderNumber?: number;
+	produto: string;
+	vendedor: string;
+	valor: number;
+	status: string;
+	diasEtapa: number;
+};
+
+export type PipelineList = {
+	items: PipelineListRow[];
+	page: number;
+	pageSize: number;
+	total: number;
+	totalPages: number;
+};
+
+export type PipelineResponse = {
+	statusCounts: PipelineStageCount[];
+	terminal: PipelineStageCount[];
+	funnel: PipelineFunnelBucket[];
+	list: PipelineList;
+};
