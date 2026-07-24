@@ -18,6 +18,7 @@ import {
 	ChevronDown,
 	ChevronRight,
 	Clock,
+	LayoutDashboard,
 	LoaderCircle,
 	Menu,
 	Search,
@@ -218,6 +219,17 @@ export default function Navbar({ searchedItem = "" }: NavbarProps) {
 												</Link>
 											</div>
 										</div>
+										{user.role === "admin" && (
+											<div className="px-4 py-4 border-t border-t-gray-5/70">
+												<Link
+													href="/admin/executive-overview"
+													className="flex items-center gap-2 text-gray-2 hover:text-neutral-900 transition-colors duration-150"
+												>
+													<LayoutDashboard size={20} />
+													<h6>Dashboard Executivo</h6>
+												</Link>
+											</div>
+										)}
 										<div>
 											{sectionsListData.map((g, _) => {
 												return (

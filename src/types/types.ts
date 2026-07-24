@@ -459,3 +459,63 @@ export type CardPaymentResponse = {
 		status_detail: string;
 	};
 };
+
+// Dashboard Executivo — Visão Executiva (GET /dashboard/executive-overview)
+export type MonthlyForecastActual = {
+	month: string;
+	label: string;
+	previsto: number;
+	realizado: number;
+};
+
+export type ForecastActualAccumulated = {
+	previsto: number;
+	realizado: number;
+};
+
+export type ExecutiveOverviewResponse = {
+	period: { from: string; to: string };
+	faturamento: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	receita: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	operacoes: {
+		monthly: MonthlyForecastActual[];
+	};
+};
+
+// Dashboard Executivo — Pipeline das Operações (GET /dashboard/pipeline)
+// Contrato assumido a partir da descrição do endpoint + wireframe do PDF do cliente;
+// ainda não confirmado campo a campo contra o back real.
+export type PipelineStatusCounts = Partial<Record<OrderStatus, number>>;
+
+export type PipelineTerminal = {
+	cancelled: number;
+	rejected: number;
+};
+
+export type PipelineFunnelBucket = {
+	stage: string;
+	count: number;
+};
+
+export type PipelineListRow = {
+	id: string;
+	orderNumber?: number;
+	product: string;
+	seller: string;
+	value: number;
+	status: OrderStatus;
+	daysInStage: number;
+};
+
+export type PipelineResponse = {
+	statusCounts: PipelineStatusCounts;
+	terminal: PipelineTerminal;
+	funnel: PipelineFunnelBucket[];
+	list: PipelineListRow[];
+};
