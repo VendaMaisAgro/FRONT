@@ -489,33 +489,40 @@ export type ExecutiveOverviewResponse = {
 };
 
 // Dashboard Executivo — Pipeline das Operações (GET /dashboard/pipeline)
-// Contrato assumido a partir da descrição do endpoint + wireframe do PDF do cliente;
-// ainda não confirmado campo a campo contra o back real.
-export type PipelineStatusCounts = Partial<Record<OrderStatus, number>>;
-
-export type PipelineTerminal = {
-	cancelled: number;
-	rejected: number;
+export type PipelineStageCount = {
+	stage: number;
+	key: string;
+	label: string;
+	count: number;
 };
 
 export type PipelineFunnelBucket = {
-	stage: string;
+	key: string;
+	label: string;
 	count: number;
 };
 
 export type PipelineListRow = {
 	id: string;
 	orderNumber?: number;
-	product: string;
-	seller: string;
-	value: number;
-	status: OrderStatus;
-	daysInStage: number;
+	produto: string;
+	vendedor: string;
+	valor: number;
+	status: string;
+	diasEtapa: number;
+};
+
+export type PipelineList = {
+	items: PipelineListRow[];
+	page: number;
+	pageSize: number;
+	total: number;
+	totalPages: number;
 };
 
 export type PipelineResponse = {
-	statusCounts: PipelineStatusCounts;
-	terminal: PipelineTerminal;
+	statusCounts: PipelineStageCount[];
+	terminal: PipelineStageCount[];
 	funnel: PipelineFunnelBucket[];
-	list: PipelineListRow[];
+	list: PipelineList;
 };

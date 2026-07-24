@@ -3,6 +3,13 @@
 import PipelineFunnel from "@/components/admin/PipelineFunnel";
 import PipelineStatusBreakdown from "@/components/admin/PipelineStatusBreakdown";
 import { Badge } from "@/components/ui/badge";
+import {
+	Pagination,
+	PaginationContent,
+	PaginationItem,
+	PaginationNext,
+	PaginationPrevious,
+} from "@/components/ui/pagination";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
 	Table,
@@ -13,9 +20,11 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import useFetchPipeline from "@/hooks/useFetchPipeline";
-import { ORDER_STATUS_BADGE_CLASS, ORDER_STATUS_LABELS } from "@/lib/orderStatus";
 import { moneyMask } from "@/utils/functions";
 import { AlertTriangle } from "lucide-react";
+import { useState } from "react";
+
+const PAGE_SIZE = 20;
 
 function errorMessage(status: number) {
 	if (status === 403) {
@@ -28,7 +37,8 @@ function errorMessage(status: number) {
 }
 
 export default function PipelineClient() {
-	const { result, isLoading } = useFetchPipeline();
+	const [page, setPage] = useState(1);
+	const { result, isLoading } = useFetchPipeline(page, PAGE_SIZE);
 
 	if (isLoading) {
 		return (
@@ -62,42 +72,73 @@ export default function PipelineClient() {
 				<h3 className="mb-4 text-sm font-semibold text-foreground">
 					Operações em andamento
 				</h3>
-				{list.length === 0 ? (
+				{list.items.length === 0 ? (
 					<p className="py-6 text-center text-sm text-muted-foreground">
 						Nenhuma operação encontrada.
 					</p>
 				) : (
-					<Table>
-						<TableHeader>
-							<TableRow>
-								<TableHead>Pedido</TableHead>
-								<TableHead>Produto</TableHead>
-								<TableHead>Vendedor</TableHead>
-								<TableHead>Valor</TableHead>
-								<TableHead>Status</TableHead>
-								<TableHead>Dias na etapa</TableHead>
-							</TableRow>
-						</TableHeader>
-						<TableBody>
-							{list.map((row) => (
-								<TableRow key={row.id}>
-									<TableCell>{row.orderNumber ?? row.id}</TableCell>
-									<TableCell>{row.product}</TableCell>
-									<TableCell>{row.seller}</TableCell>
-									<TableCell>{moneyMask(row.value)}</TableCell>
-									<TableCell>
-										<Badge
-											variant="secondary"
-											className={ORDER_STATUS_BADGE_CLASS[row.status]}
-										>
-											{ORDER_STATUS_LABELS[row.status]}
-										</Badge>
-									</TableCell>
-									<TableCell>{row.daysInStage} dia(s)</TableCell>
+					<>
+						<Table>
+							<TableHeader>
+								<TableRow>
+									<TableHead>Pedido</TableHead>
+									<TableHead>Produto</TableHead>
+									<TableHead>Vendedor</TableHead>
+									<TableHead>Valor</TableHead>
+									<TableHead>Status</TableHead>
+									<TableHead>Dias na etapa</TableHead>
 								</TableRow>
-							))}
-						</TableBody>
-					</Table>
+							</TableHeader>
+							<TableBody>
+								{list.items.map((row) => (
+									<TableRow key={row.id}>
+										<TableCell>{row.orderNumber ?? row.id}</TableCell>
+										<TableCell>{row.produto}</TableCell>
+										<TableCell>{row.vendedor}</TableCell>
+										<TableCell>{moneyMask(row.valor)}</TableCell>
+										<TableCell>
+											<Badge variant="outline">{row.status}</Badge>
+										</TableCell>
+										<TableCell>{row.diasEtapa} dia(s)</TableCell>
+									</TableRow>
+								))}
+							</TableBody>
+						</Table>
+
+						<div className="mt-4 flex flex-col items-center gap-2 sm:flex-row sm:justify-between">
+							<p className="text-xs text-muted-foreground">
+								Página {list.page} de {list.totalPages} — {list.total} registro(s)
+							</p>
+							<Pagination className="mx-0 w-auto">
+								<PaginationContent>
+									<PaginationItem>
+										<PaginationPrevious
+											href="#"
+											aria-disabled={list.page <= 1}
+											className={list.page <= 1 ? "pointer-events-none opacity-50" : ""}
+											onClick={(e) => {
+												e.preventDefault();
+												setPage((p) => Math.max(1, p - 1));
+											}}
+										/>
+									</PaginationItem>
+									<PaginationItem>
+										<PaginationNext
+											href="#"
+											aria-disabled={list.page >= list.totalPages}
+											className={
+												list.page >= list.totalPages ? "pointer-events-none opacity-50" : ""
+											}
+											onClick={(e) => {
+												e.preventDefault();
+												setPage((p) => Math.min(list.totalPages, p + 1));
+											}}
+										/>
+									</PaginationItem>
+								</PaginationContent>
+							</Pagination>
+						</div>
+					</>
 				)}
 			</div>
 		</div>

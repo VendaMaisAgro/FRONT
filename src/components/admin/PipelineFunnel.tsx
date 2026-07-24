@@ -34,7 +34,7 @@ export default function PipelineFunnel({ data }: PipelineFunnelProps) {
 					<XAxis type="number" hide />
 					<YAxis
 						type="category"
-						dataKey="stage"
+						dataKey="label"
 						tickLine={false}
 						axisLine={false}
 						width={110}

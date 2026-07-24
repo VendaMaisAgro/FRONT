@@ -34,12 +34,19 @@ export type PipelineResult =
   | { ok: true; data: PipelineResponse }
   | { ok: false; status: number };
 
-export async function getPipeline(): Promise<PipelineResult> {
+export async function getPipeline(params?: {
+  page?: number;
+  pageSize?: number;
+}): Promise<PipelineResult> {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
   await verifySession(session);
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/pipeline`, {
+  const url = new URL(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/pipeline`);
+  if (params?.page) url.searchParams.set("page", String(params.page));
+  if (params?.pageSize) url.searchParams.set("pageSize", String(params.pageSize));
+
+  const res = await fetch(url, {
     method: "GET",
     headers: {
       Cookie: `session=${session}`,

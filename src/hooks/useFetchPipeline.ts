@@ -1,10 +1,11 @@
 import { getPipeline } from "@/actions/dashboard";
-import { useQuery } from "@tanstack/react-query";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 
-export default function useFetchPipeline() {
-	const { data: result, isLoading } = useQuery({
-		queryKey: ["pipeline"],
-		queryFn: getPipeline,
+export default function useFetchPipeline(page: number = 1, pageSize: number = 20) {
+	const { data: result, isLoading, isFetching } = useQuery({
+		queryKey: ["pipeline", page, pageSize],
+		queryFn: () => getPipeline({ page, pageSize }),
+		placeholderData: keepPreviousData,
 	});
-	return { result, isLoading };
+	return { result, isLoading, isFetching };
 }
