@@ -1,6 +1,6 @@
 "use client";
 
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/logo.png";
 import AdminModeSwitch from "@/components/admin/AdminModeSwitch";
 import Sidemenu from "@/components/sidemenu";
 import { Button } from "@/components/ui/button";

@@ -1,7 +1,7 @@
 // components/Navbar.tsx
 "use client";
 
-import logo from "@/assets/logo.svg";
+import logo from "@/assets/logo.png";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";

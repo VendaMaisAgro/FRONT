@@ -17,7 +17,7 @@ export default function LoginPage() {
       <section className="w-full md:w-[40%] px-6 md:px-20 py-10 flex flex-col justify-center text-black mt-5">
         <div className="flex md:hidden justify-center items-center mb-10">
           <Image
-            src="/logoVenda+AgromarketColor.svg"
+            src="/logoVenda+AgromarketColor.png"
             alt="Logo da Venda+ Agromarket"
             width={240}
             height={70}
@@ -35,7 +35,7 @@ export default function LoginPage() {
       >
         <div className="absolute top-6 left-6 z-10">
           <Image
-            src="/logoVenda+Agromarket.svg"
+            src="/logoVenda+Agromarket.png"
             alt="Logo da Venda+ Agromarket"
             width={160}
             height={40}
