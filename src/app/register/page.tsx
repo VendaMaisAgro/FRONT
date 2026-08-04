@@ -67,7 +67,7 @@ export default function RegisterPage() {
 				/>
 
 				<Image
-					src="/logoVenda+Agromarket.svg"
+					src="/logoVenda+Agromarket.png"
 					alt="Logo Venda+ Agromarket"
 					width={160}
 					height={40}

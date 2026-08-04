@@ -95,7 +95,7 @@ export default function Page() {
       <div className="hidden md:block w-full md:w-[60%] relative">
         <div className="absolute top-6 left-6 z-10">
           <Image
-            src="/logoVenda+Agromarket.svg"
+            src="/logoVenda+Agromarket.png"
             alt="Venda+ Agromarket"
             width={150}
             height={50}

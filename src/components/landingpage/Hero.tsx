@@ -8,7 +8,7 @@ const Hero = () => {
 	return (
 		<section className="relative h-screen bg-black">
 			<Image
-				src="/logoVenda+Agromarket.svg"
+				src="/logoVenda+Agromarket.png"
 				alt="Hero image"
 				width={500}
 				height={500}
