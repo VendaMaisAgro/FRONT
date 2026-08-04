@@ -35,13 +35,13 @@ const navItems = [
 		title: "Alertas Operacionais",
 		href: "/admin/alerts",
 		icon: AlertTriangle,
-		enabled: false,
+		enabled: true,
 	},
 	{
 		title: "Logística e Desempenho",
 		href: "/admin/logistics",
 		icon: Truck,
-		enabled: false,
+		enabled: true,
 	},
 ];
 

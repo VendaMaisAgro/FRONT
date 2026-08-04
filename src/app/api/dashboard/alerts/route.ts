@@ -12,11 +12,9 @@ export async function GET(request: NextRequest) {
   const token = await verifySession(session);
 
   const { searchParams } = new URL(request.url);
-  const upstreamUrl = new URL(`${process.env.API_URL}/dashboard/pipeline`);
-  for (const key of ["page", "pageSize", "startDate", "endDate", "stage"]) {
-    const value = searchParams.get(key);
-    if (value) upstreamUrl.searchParams.set(key, value);
-  }
+  const upstreamUrl = new URL(`${process.env.API_URL}/dashboard/alerts`);
+  const limit = searchParams.get("limit");
+  if (limit) upstreamUrl.searchParams.set("limit", limit);
 
   const res = await fetch(upstreamUrl, {
     headers: {
@@ -31,7 +29,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(
-    { error: "Erro ao buscar pipeline das operações" },
+    { error: "Erro ao buscar alertas operacionais" },
     { status: res.status }
   );
 }

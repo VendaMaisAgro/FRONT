@@ -1,8 +1,8 @@
 import { verifySession } from "@/lib/session";
 import { cookies } from "next/headers";
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   const session = (await cookies()).get("session")?.value;
 
   if (!session) {
@@ -11,14 +11,7 @@ export async function GET(request: NextRequest) {
 
   const token = await verifySession(session);
 
-  const { searchParams } = new URL(request.url);
-  const upstreamUrl = new URL(`${process.env.API_URL}/dashboard/pipeline`);
-  for (const key of ["page", "pageSize", "startDate", "endDate", "stage"]) {
-    const value = searchParams.get(key);
-    if (value) upstreamUrl.searchParams.set(key, value);
-  }
-
-  const res = await fetch(upstreamUrl, {
+  const res = await fetch(`${process.env.API_URL}/dashboard/logistics`, {
     headers: {
       Authorization: `Bearer ${token.jwt}`,
     },
@@ -31,7 +24,7 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.json(
-    { error: "Erro ao buscar pipeline das operações" },
+    { error: "Erro ao buscar logística e desempenho" },
     { status: res.status }
   );
 }
