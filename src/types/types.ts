@@ -526,3 +526,46 @@ export type PipelineResponse = {
 	funnel: PipelineFunnelBucket[];
 	list: PipelineList;
 };
+
+// Dashboard Executivo — Alertas Operacionais (GET /dashboard/alerts)
+export type AlertsCounts = {
+	semPagamentoAntesColheita: number;
+	semUploadDocumentos: number;
+	entregaAtrasada: number;
+	pagamentoVencido: number;
+};
+
+export type AlertItem = {
+	id: string;
+	orderNumber?: number;
+	problema: string;
+	responsavel: string;
+	acao: string;
+};
+
+export type AlertsResponse = {
+	counts: AlertsCounts;
+	list: {
+		items: AlertItem[];
+		total: number;
+		limit: number;
+	};
+};
+
+// Dashboard Executivo — Logística e Desempenho (GET /dashboard/logistics)
+export type LogisticsPerformanceRow = {
+	id: string;
+	name: string;
+	delivered: number;
+	onTimePercent: number;
+	alerta: boolean;
+};
+
+export type LogisticsResponse = {
+	deliveredCount: number;
+	averageDeliveryDays: number | null;
+	onTimePercent: number | null;
+	averageDelayDays: number | null;
+	byBuyer: LogisticsPerformanceRow[];
+	bySeller: LogisticsPerformanceRow[];
+};
