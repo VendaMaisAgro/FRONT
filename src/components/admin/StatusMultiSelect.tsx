@@ -53,17 +53,19 @@ export default function StatusMultiSelect({
 			<PopoverContent align="start" className="w-72 p-2">
 				<div className="max-h-72 space-y-0.5 overflow-y-auto">
 					{options.map((opt) => (
-						<label
+						<div
 							key={opt.stage}
+							onClick={() => toggle(opt.stage)}
 							className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-sm hover:bg-muted"
 						>
 							<Checkbox
 								checked={selected.includes(opt.stage)}
 								onCheckedChange={() => toggle(opt.stage)}
+								onClick={(e) => e.stopPropagation()}
 							/>
 							<span className="flex-1">{opt.label}</span>
 							<span className="text-xs text-muted-foreground">{opt.count}</span>
-						</label>
+						</div>
 					))}
 				</div>
 				{selected.length > 0 && (
