@@ -5,27 +5,62 @@ type KpiCardProps = {
 	value: string;
 	subValue?: string;
 	icon?: LucideIcon;
+	/** Classes de cor do badge do ícone (ex: "bg-info/10 text-info"). Só usado com tone="neutral". */
+	iconClassName?: string;
 	tone?: "primary" | "neutral";
 };
 
-export function KpiCard({ title, value, subValue, icon: Icon, tone = "primary" }: KpiCardProps) {
+export function KpiCard({
+	title,
+	value,
+	subValue,
+	icon: Icon,
+	iconClassName = "bg-primary/10 text-primary",
+	tone = "primary",
+}: KpiCardProps) {
 	return (
 		<div
 			className={
 				tone === "primary"
-					? "rounded-xl bg-primary p-5 text-white"
-					: "rounded-xl border border-border bg-white p-5"
+					? "min-w-0 overflow-hidden rounded-xl bg-primary p-4 text-white"
+					: "min-w-0 overflow-hidden rounded-xl border border-border bg-white p-4"
 			}
 		>
-			<div className="flex items-center justify-between gap-2">
-				<span className={tone === "primary" ? "text-sm opacity-90" : "text-sm text-muted-foreground"}>
+			<div className="flex min-w-0 items-center gap-2">
+				{Icon && (
+					<span
+						className={
+							tone === "primary"
+								? "flex size-8 shrink-0 items-center justify-center rounded-lg bg-white/15 text-white"
+								: `flex size-8 shrink-0 items-center justify-center rounded-lg ${iconClassName}`
+						}
+					>
+						<Icon size={16} />
+					</span>
+				)}
+				<span
+					title={title}
+					className={
+						tone === "primary"
+							? "truncate text-xs opacity-90 sm:text-sm"
+							: "truncate text-xs text-muted-foreground sm:text-sm"
+					}
+				>
 					{title}
 				</span>
-				{Icon && <Icon size={18} className={tone === "primary" ? "opacity-90" : "text-muted-foreground"} />}
 			</div>
-			<div className="mt-1 text-2xl font-semibold">{value}</div>
+			<div title={value} className="mt-2 truncate text-lg font-semibold sm:text-xl">
+				{value}
+			</div>
 			{subValue && (
-				<div className={tone === "primary" ? "mt-0.5 text-xs opacity-80" : "mt-0.5 text-xs text-muted-foreground"}>
+				<div
+					title={subValue}
+					className={
+						tone === "primary"
+							? "mt-0.5 truncate text-xs opacity-80"
+							: "mt-0.5 truncate text-xs text-muted-foreground"
+					}
+				>
 					{subValue}
 				</div>
 			)}

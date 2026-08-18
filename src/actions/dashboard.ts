@@ -13,12 +13,23 @@ export type ExecutiveOverviewResult =
   | { ok: true; data: ExecutiveOverviewResponse }
   | { ok: false; status: number };
 
-export async function getExecutiveOverview(): Promise<ExecutiveOverviewResult> {
+export async function getExecutiveOverview(params?: {
+  produto?: string;
+  comprador?: string;
+  vendedor?: string;
+  tipoOperacao?: string;
+}): Promise<ExecutiveOverviewResult> {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
   await verifySession(session);
 
-  const res = await fetch(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/executive-overview`, {
+  const url = new URL(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/executive-overview`);
+  if (params?.produto) url.searchParams.set("produto", params.produto);
+  if (params?.comprador) url.searchParams.set("comprador", params.comprador);
+  if (params?.vendedor) url.searchParams.set("vendedor", params.vendedor);
+  if (params?.tipoOperacao) url.searchParams.set("tipoOperacao", params.tipoOperacao);
+
+  const res = await fetch(url, {
     method: "GET",
     headers: {
       Cookie: `session=${session}`,
