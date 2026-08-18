@@ -1,8 +1,8 @@
 import { verifySession } from "@/lib/session";
 import { cookies } from "next/headers";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   const session = (await cookies()).get("session")?.value;
 
   if (!session) {
@@ -11,7 +11,14 @@ export async function GET() {
 
   const token = await verifySession(session);
 
-  const res = await fetch(`${process.env.API_URL}/dashboard/executive-overview`, {
+  const { searchParams } = new URL(request.url);
+  const upstreamUrl = new URL(`${process.env.API_URL}/dashboard/executive-overview`);
+  for (const key of ["produto", "comprador", "vendedor", "tipoOperacao"]) {
+    const value = searchParams.get(key);
+    if (value) upstreamUrl.searchParams.set(key, value);
+  }
+
+  const res = await fetch(upstreamUrl, {
     headers: {
       Authorization: `Bearer ${token.jwt}`,
     },

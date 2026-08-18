@@ -16,13 +16,14 @@ const COLOR_FUNNEL = "#3b9535"; // --primary
 
 type PipelineFunnelProps = {
 	data: PipelineFunnelBucket[];
+	title?: string;
 };
 
-export default function PipelineFunnel({ data }: PipelineFunnelProps) {
+export default function PipelineFunnel({ data, title = "Funil de Operações" }: PipelineFunnelProps) {
 	return (
 		<div className="rounded-xl border border-border bg-white p-4">
 			<h3 className="mb-4 text-sm font-semibold text-foreground">
-				Funil de Operações
+				{title}
 			</h3>
 			<ResponsiveContainer width="100%" height={Math.max(200, data.length * 48)}>
 				<BarChart

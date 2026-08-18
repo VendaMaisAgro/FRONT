@@ -473,6 +473,44 @@ export type ForecastActualAccumulated = {
 	realizado: number;
 };
 
+export type ExecutiveOverviewCounters = {
+	operacoesAtivas: number;
+	operacoesConcluidas: number;
+	operacoesBloqueadas: number;
+	valorRetido: number;
+};
+
+export type FilterOption = {
+	id: string;
+	name: string;
+};
+
+export type ExecutiveOverviewFilterOptions = {
+	produtos: FilterOption[];
+	compradores: FilterOption[];
+	vendedores: FilterOption[];
+	tiposOperacao: FilterOption[];
+};
+
+export type ProductRevenue = {
+	produto: string;
+	valor: number;
+	percentual: number;
+};
+
+export type OriginDestinationRoute = {
+	origem: string;
+	destino: string;
+	quantidade: number;
+	valor: number;
+};
+
+export type PartyRanking = {
+	nome: string;
+	faturamento: number;
+	percentualParticipacao: number;
+};
+
 export type ExecutiveOverviewResponse = {
 	period: { from: string; to: string };
 	faturamento: {
@@ -485,6 +523,17 @@ export type ExecutiveOverviewResponse = {
 	};
 	operacoes: {
 		monthly: MonthlyForecastActual[];
+	};
+	counters: ExecutiveOverviewCounters;
+	filterOptions: ExecutiveOverviewFilterOptions;
+	faturamentoPorProduto: ProductRevenue[];
+	origemDestino: OriginDestinationRoute[];
+	principaisCompradores: PartyRanking[];
+	principaisVendedores: PartyRanking[];
+	pipeline: {
+		statusCounts: PipelineStageCount[];
+		terminal: PipelineStageCount[];
+		funnel: PipelineFunnelBucket[];
 	};
 };
 
