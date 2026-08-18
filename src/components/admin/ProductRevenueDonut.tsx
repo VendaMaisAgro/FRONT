@@ -62,8 +62,8 @@ export default function ProductRevenueDonut({ data, valueFormatter }: ProductRev
 									strokeWidth={2}
 									stroke="#ffffff"
 								>
-									{slices.map((slice) => (
-										<Cell key={slice.produto} fill={slice.color} />
+									{slices.map((slice, index) => (
+										<Cell key={`${slice.produto}-${index}`} fill={slice.color} />
 									))}
 								</Pie>
 								<Tooltip formatter={(value) => valueFormatter(Number(value))} />
@@ -72,8 +72,8 @@ export default function ProductRevenueDonut({ data, valueFormatter }: ProductRev
 					</div>
 
 					<ul className="w-full min-w-0 flex-1 space-y-2">
-						{slices.map((slice) => (
-							<li key={slice.produto} className="flex min-w-0 items-center justify-between gap-2 text-sm">
+						{slices.map((slice, index) => (
+							<li key={`${slice.produto}-${index}`} className="flex min-w-0 items-center justify-between gap-2 text-sm">
 								<span className="flex min-w-0 items-center gap-2 text-foreground">
 									<span
 										className="inline-block size-2.5 shrink-0 rounded-full"

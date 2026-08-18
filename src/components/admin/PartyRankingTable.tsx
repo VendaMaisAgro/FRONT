@@ -18,8 +18,8 @@ export default function PartyRankingTable({ title, rows, valueFormatter }: Party
 				<p className="py-6 text-center text-sm text-muted-foreground">Sem dados no período.</p>
 			) : (
 				<ul className="space-y-3">
-					{rows.map((row) => (
-						<li key={row.nome} className="min-w-0">
+					{rows.map((row, index) => (
+						<li key={`${row.nome}-${index}`} className="min-w-0">
 							<div className="flex min-w-0 items-center justify-between gap-2 text-sm">
 								<span title={row.nome} className="min-w-0 truncate text-foreground">
 									{row.nome}
