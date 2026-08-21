@@ -459,3 +459,162 @@ export type CardPaymentResponse = {
 		status_detail: string;
 	};
 };
+
+// Dashboard Executivo — Visão Executiva (GET /dashboard/executive-overview)
+export type MonthlyForecastActual = {
+	month: string;
+	label: string;
+	previsto: number;
+	realizado: number;
+};
+
+export type ForecastActualAccumulated = {
+	previsto: number;
+	realizado: number;
+};
+
+export type ExecutiveOverviewCounters = {
+	operacoesAtivas: number;
+	operacoesConcluidas: number;
+	operacoesBloqueadas: number;
+	valorRetido: number;
+};
+
+export type FilterOption = {
+	id: string;
+	name: string;
+};
+
+export type ExecutiveOverviewFilterOptions = {
+	produtos: FilterOption[];
+	compradores: FilterOption[];
+	vendedores: FilterOption[];
+	tiposOperacao: FilterOption[];
+};
+
+export type ProductRevenue = {
+	produto: string;
+	valor: number;
+	percentual: number;
+};
+
+export type OriginDestinationRoute = {
+	origem: string;
+	destino: string;
+	quantidade: number;
+	valor: number;
+};
+
+export type PartyRanking = {
+	nome: string;
+	faturamento: number;
+	percentualParticipacao: number;
+};
+
+export type ExecutiveOverviewResponse = {
+	period: { from: string; to: string };
+	faturamento: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	receita: {
+		monthly: MonthlyForecastActual[];
+		accumulated: ForecastActualAccumulated;
+	};
+	operacoes: {
+		monthly: MonthlyForecastActual[];
+	};
+	counters: ExecutiveOverviewCounters;
+	filterOptions: ExecutiveOverviewFilterOptions;
+	faturamentoPorProduto: ProductRevenue[];
+	origemDestino: OriginDestinationRoute[];
+	principaisCompradores: PartyRanking[];
+	principaisVendedores: PartyRanking[];
+	pipeline: {
+		statusCounts: PipelineStageCount[];
+		terminal: PipelineStageCount[];
+		funnel: PipelineFunnelBucket[];
+	};
+};
+
+// Dashboard Executivo — Pipeline das Operações (GET /dashboard/pipeline)
+export type PipelineStageCount = {
+	stage: number;
+	key: string;
+	label: string;
+	count: number;
+};
+
+export type PipelineFunnelBucket = {
+	key: string;
+	label: string;
+	count: number;
+};
+
+export type PipelineListRow = {
+	id: string;
+	orderNumber?: number;
+	produto: string;
+	vendedor: string;
+	valor: number;
+	status: string;
+	diasEtapa: number;
+};
+
+export type PipelineList = {
+	items: PipelineListRow[];
+	page: number;
+	pageSize: number;
+	total: number;
+	totalPages: number;
+};
+
+export type PipelineResponse = {
+	statusCounts: PipelineStageCount[];
+	terminal: PipelineStageCount[];
+	funnel: PipelineFunnelBucket[];
+	list: PipelineList;
+};
+
+// Dashboard Executivo — Alertas Operacionais (GET /dashboard/alerts)
+export type AlertsCounts = {
+	semPagamentoAntesColheita: number;
+	semUploadDocumentos: number;
+	entregaAtrasada: number;
+	pagamentoVencido: number;
+};
+
+export type AlertItem = {
+	id: string;
+	orderNumber?: number;
+	problema: string;
+	responsavel: string;
+	acao: string;
+};
+
+export type AlertsResponse = {
+	counts: AlertsCounts;
+	list: {
+		items: AlertItem[];
+		total: number;
+		limit: number;
+	};
+};
+
+// Dashboard Executivo — Logística e Desempenho (GET /dashboard/logistics)
+export type LogisticsPerformanceRow = {
+	id: string;
+	name: string;
+	delivered: number;
+	onTimePercent: number;
+	alerta: boolean;
+};
+
+export type LogisticsResponse = {
+	deliveredCount: number;
+	averageDeliveryDays: number | null;
+	onTimePercent: number | null;
+	averageDelayDays: number | null;
+	byBuyer: LogisticsPerformanceRow[];
+	bySeller: LogisticsPerformanceRow[];
+};

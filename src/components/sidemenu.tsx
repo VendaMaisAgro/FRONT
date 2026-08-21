@@ -1,4 +1,5 @@
 "use client";
+import AdminModeSwitch from "@/components/admin/AdminModeSwitch";
 import { Button } from "@/components/ui/button";
 import { SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { useUserStore } from "@/store/userInfoStore";
@@ -67,6 +68,11 @@ export default function Sidemenu({ handleLogout }: SidemenuProps) {
 						<Home size={20} />
 						<h6>Início</h6>
 					</Link>
+					{user?.role === "admin" && (
+						<div className="mt-3">
+							<AdminModeSwitch />
+						</div>
+					)}
 				</div>
 				{sectionsListData.map((g, _) => {
 					return (

@@ -1,4 +1,4 @@
-import logoW from "@/assets/logoW.svg";
+import logoW from "@/assets/logoW.png";
 import { footerSections } from "@/utils/data";
 import Image from "next/image";
 import Link from "next/link";
