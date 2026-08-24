@@ -107,13 +107,14 @@ export default function PipelineClient() {
 	const [pageSize, setPageSize] = useState(10);
 	const [showStatusDetails, setShowStatusDetails] = useState(false);
 
-	const startDate = preset
-		? computePresetRange(preset).startDate
+	const presetRange = preset ? computePresetRange(preset) : null;
+	const startDate = presetRange
+		? presetRange.startDate
 		: customStart
 			? startOfDayISO(customStart)
 			: undefined;
-	const endDate = preset
-		? computePresetRange(preset).endDate
+	const endDate = presetRange
+		? presetRange.endDate
 		: customEnd
 			? endOfDayISO(customEnd)
 			: undefined;

@@ -31,18 +31,23 @@ export default function DateRangeFilter({
 	onCustomChange,
 	onClear,
 }: DateRangeFilterProps) {
-	const hasFilter = preset !== null || customStart !== "" || customEnd !== "";
+	const hasCustomDates = customStart !== "" || customEnd !== "";
+	const hasFilter = preset !== null || hasCustomDates;
+	// Só mostra "Personalizado" selecionado quando já há data digitada — com preset
+	// nulo e nenhuma data preenchida, o filtro não está ativo, então o select deve
+	// mostrar o placeholder em vez de sugerir uma seleção que não existe de fato.
+	const selectValue = preset ?? (hasCustomDates ? CUSTOM : undefined);
 
 	return (
 		<div className="flex flex-wrap items-end gap-2">
 			<div className="flex flex-col gap-1">
 				<span className="text-xs text-muted-foreground">Período</span>
 				<Select
-					value={preset ?? CUSTOM}
+					value={selectValue}
 					onValueChange={(v) => onPresetSelect(v === CUSTOM ? null : (v as DatePreset))}
 				>
 					<SelectTrigger size="sm" className="w-[9.5rem]">
-						<SelectValue />
+						<SelectValue placeholder="Período" />
 					</SelectTrigger>
 					<SelectContent>
 						{DATE_PRESET_OPTIONS.map((opt) => (
