@@ -389,7 +389,17 @@ export default function PipelineClient() {
 												</TableCell>
 												<TableCell>{row.diasEtapa} dia(s)</TableCell>
 												<TableCell className="text-right">
-													<Eye size={16} className="ml-auto text-muted-foreground/50" />
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon"
+														disabled
+														className="ml-auto size-7"
+														aria-label={`Ver detalhes da operação ${row.orderNumber} (em breve)`}
+														title="Ver detalhes (em breve)"
+													>
+														<Eye size={16} className="text-muted-foreground/60" />
+													</Button>
 												</TableCell>
 											</TableRow>
 										))}
