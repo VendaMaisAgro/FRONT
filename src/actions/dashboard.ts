@@ -56,6 +56,11 @@ export async function getPipeline(params?: {
   startDate?: string;
   endDate?: string;
   stage?: string;
+  blocked?: boolean;
+  produto?: string;
+  comprador?: string;
+  vendedor?: string;
+  tipoOperacao?: string;
 }): Promise<PipelineResult> {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
@@ -67,6 +72,11 @@ export async function getPipeline(params?: {
   if (params?.startDate) url.searchParams.set("startDate", params.startDate);
   if (params?.endDate) url.searchParams.set("endDate", params.endDate);
   if (params?.stage) url.searchParams.set("stage", params.stage);
+  if (params?.blocked) url.searchParams.set("blocked", "true");
+  if (params?.produto) url.searchParams.set("produto", params.produto);
+  if (params?.comprador) url.searchParams.set("comprador", params.comprador);
+  if (params?.vendedor) url.searchParams.set("vendedor", params.vendedor);
+  if (params?.tipoOperacao) url.searchParams.set("tipoOperacao", params.tipoOperacao);
 
   const res = await fetch(url, {
     method: "GET",

@@ -553,8 +553,9 @@ export type PipelineFunnelBucket = {
 
 export type PipelineListRow = {
 	id: string;
-	orderNumber?: number;
+	orderNumber: number;
 	produto: string;
+	comprador: string;
 	vendedor: string;
 	valor: number;
 	status: string;
@@ -569,10 +570,44 @@ export type PipelineList = {
 	totalPages: number;
 };
 
+export type PipelineCounters = {
+	operacoesAtivas: number;
+	finalizadas: number;
+	aguardandoPagamento: number;
+	bloqueadas: number;
+	taxaConversaoPercent: number;
+	totalContratos: number;
+};
+
+export type PipelineGargalos = {
+	aguardandoPagamento: number;
+	bloqueadas: number;
+	semDocumentos: number;
+	entregaAtrasada: number;
+};
+
+export type PipelineStatusOption = {
+	value: string;
+	label: string;
+	stages?: number[];
+	blocked?: true;
+};
+
+export type PipelineFilterOptions = {
+	produtos: FilterOption[];
+	compradores: FilterOption[];
+	vendedores: FilterOption[];
+	tiposOperacao: FilterOption[];
+	status: PipelineStatusOption[];
+};
+
 export type PipelineResponse = {
 	statusCounts: PipelineStageCount[];
 	terminal: PipelineStageCount[];
 	funnel: PipelineFunnelBucket[];
+	counters: PipelineCounters;
+	gargalos: PipelineGargalos;
+	filterOptions: PipelineFilterOptions;
 	list: PipelineList;
 };
 
