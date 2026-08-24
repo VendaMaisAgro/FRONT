@@ -99,13 +99,25 @@ export type AlertsResult =
   | { ok: true; data: AlertsResponse }
   | { ok: false; status: number };
 
-export async function getAlerts(params?: { limit?: number }): Promise<AlertsResult> {
+export async function getAlerts(params?: {
+  limit?: number;
+  startDate?: string;
+  endDate?: string;
+  categoria?: string;
+  criticidade?: string;
+  parceiro?: string;
+}): Promise<AlertsResult> {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
   await verifySession(session);
 
   const url = new URL(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/alerts`);
   if (params?.limit) url.searchParams.set("limit", String(params.limit));
+  if (params?.startDate) url.searchParams.set("startDate", params.startDate);
+  if (params?.endDate) url.searchParams.set("endDate", params.endDate);
+  if (params?.categoria) url.searchParams.set("categoria", params.categoria);
+  if (params?.criticidade) url.searchParams.set("criticidade", params.criticidade);
+  if (params?.parceiro) url.searchParams.set("parceiro", params.parceiro);
 
   const res = await fetch(url, {
     method: "GET",

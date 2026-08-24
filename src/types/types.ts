@@ -612,23 +612,61 @@ export type PipelineResponse = {
 };
 
 // Dashboard Executivo — Alertas Operacionais (GET /dashboard/alerts)
+export type AlertsCounters = {
+	criticos: number;
+	medios: number;
+	resolvidos: number;
+	bloqueadas: number;
+	saudeOperacionalPercent: number | null;
+};
+
 export type AlertsCounts = {
 	semPagamentoAntesColheita: number;
-	semUploadDocumentos: number;
+	documentosPendentes: number;
 	entregaAtrasada: number;
-	pagamentoVencido: number;
+	bloqueadas: number;
+	semTermoAditivo: number;
+};
+
+export type AlertsCategoryBreakdown = {
+	categoria: string;
+	count: number;
+	percentual: number;
+};
+
+export type AlertsMonthlyTrend = {
+	month: string;
+	label: string;
+	criticos: number;
+	medios: number;
+	resolvidos: number;
+};
+
+export type AlertsFilterOptions = {
+	categorias: string[];
+	criticidades: string[];
+	parceiros: FilterOption[];
 };
 
 export type AlertItem = {
 	id: string;
-	orderNumber?: number;
-	problema: string;
-	responsavel: string;
+	orderNumber: number;
+	categoria: string;
+	criticidade: string;
+	parceiro: string;
+	descricao: string;
+	dataHora: string;
+	diasEmAberto: number;
 	acao: string;
+	status: "Aberto";
 };
 
 export type AlertsResponse = {
+	counters: AlertsCounters;
 	counts: AlertsCounts;
+	porCategoria: AlertsCategoryBreakdown[];
+	evolucaoMensal: AlertsMonthlyTrend[];
+	filterOptions: AlertsFilterOptions;
 	list: {
 		items: AlertItem[];
 		total: number;
