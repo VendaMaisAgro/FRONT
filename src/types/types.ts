@@ -648,6 +648,11 @@ export type AlertsFilterOptions = {
 	parceiros: FilterOption[];
 };
 
+// Hoje o back só emite "Aberto" nos itens da lista (resolvidos só existe como
+// contador agregado, sem item individual) — modelado como união pra não travar
+// o tipo assim que o back passar a listar itens resolvidos também.
+export type AlertStatus = "Aberto" | "Resolvido";
+
 export type AlertItem = {
 	id: string;
 	orderNumber: number;
@@ -658,7 +663,7 @@ export type AlertItem = {
 	dataHora: string;
 	diasEmAberto: number;
 	acao: string;
-	status: "Aberto";
+	status: AlertStatus;
 };
 
 export type AlertsResponse = {

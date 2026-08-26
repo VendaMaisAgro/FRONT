@@ -112,7 +112,7 @@ export async function getAlerts(params?: {
   await verifySession(session);
 
   const url = new URL(`${process.env.NEXT_PUBLIC_URL}/api/dashboard/alerts`);
-  if (params?.limit) url.searchParams.set("limit", String(params.limit));
+  if (params?.limit != null) url.searchParams.set("limit", String(params.limit));
   if (params?.startDate) url.searchParams.set("startDate", params.startDate);
   if (params?.endDate) url.searchParams.set("endDate", params.endDate);
   if (params?.categoria) url.searchParams.set("categoria", params.categoria);
