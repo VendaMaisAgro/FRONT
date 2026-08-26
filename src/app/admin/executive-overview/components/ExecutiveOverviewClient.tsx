@@ -72,7 +72,7 @@ function errorMessage(status: number) {
 export default function ExecutiveOverviewClient() {
 	const [filters, setFilters] = useState<EntityFiltersValue>({});
 	const { result, isLoading } = useFetchExecutiveOverview(filters);
-	const { result: alertsResult } = useFetchAlerts(1);
+	const { result: alertsResult } = useFetchAlerts({ limit: 1 });
 
 	const filterOptions = result && result.ok ? result.data.filterOptions : EMPTY_FILTER_OPTIONS;
 
